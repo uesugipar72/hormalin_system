@@ -1,3 +1,4 @@
+.env
 venv/
 済/
 # Python キャッシュファイル
@@ -8,5 +9,3 @@ __pycache__/
 *.xls
 # pdfファイルを無視
 *.pdf
-
-
