@@ -1,31 +1,39 @@
-﻿from dotenv import load_dotenv
-import openai
+﻿from openai import OpenAI
 import json
-import os
-
-load_dotenv()
-openai.api_key = os.getenv("OPENAI_API_KEY")
 
 def parse_command(text):
 
-    prompt = f"""
-    次の文章から在庫操作情報をJSONで抽出してください。
+    client = OpenAI()
 
-    文章: {text}
+    prompt = f"""
+    次の文章から、在庫管理コマンドをJSON形式で抽出してください。
+
+    文章:
+    {text}
 
     出力形式:
     {{
-        "action": "IN or OUT",
-        "name": "chemical name",
-        "quantity": number
+        "item": "品名",
+        "action": "入庫 or 出庫",
+        "quantity": 数値
     }}
-
-    JSONのみを出力してください。
     """
 
-    response = openai.ChatCompletion.create(
+    response = client.chat.completions.create(
         model="gpt-4o-mini",
-        messages=[{"role": "user", "content": prompt}]
+        messages=[
+            {"role": "user", "content": prompt}
+        ],
+        temperature=0
     )
 
-    return json.loads(response.choices[0].message.content)
+    content = response.choices[0].message.content
+
+    if content.startswith("```"):
+        content = content.split("```")[1]
+
+    try:
+        return json.loads(content)
+    except:
+        print("JSON変換失敗:", content)
+        return None
