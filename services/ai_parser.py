@@ -1,39 +1,39 @@
-﻿from openai import OpenAI
+﻿from gpt4all import GPT4All
 import json
+import re
+
+model = GPT4All("Meta-Llama-3-8B-Instruct.Q4_0.gguf")
 
 def parse_command(text):
 
-    client = OpenAI()
-
     prompt = f"""
-    次の文章から、在庫管理コマンドをJSON形式で抽出してください。
+    あなたは在庫管理AIです。
+    次の文章からJSONのみを出力してください。
 
     文章:
     {text}
 
     出力形式:
     {{
-        "item": "品名",
-        "action": "入庫 or 出庫",
+        "name": "品名",
+        "action": "入庫 または 出庫",
         "quantity": 数値
     }}
+
+    JSONのみ出力してください。
     """
 
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "user", "content": prompt}
-        ],
-        temperature=0
-    )
+    with model.chat_session():
+        response = model.generate(prompt)
 
-    content = response.choices[0].message.content
-
-    if content.startswith("```"):
-        content = content.split("```")[1]
-
-    try:
-        return json.loads(content)
-    except:
-        print("JSON変換失敗:", content)
+    # JSON抽出
+    match = re.search(r'\{.*\}', response, re.DOTALL)
+    if match:
+        try:
+            return json.loads(match.group())
+        except:
+            print("JSON解析失敗:", response)
+            return None
+    else:
+        print("JSONが見つかりません:", response)
         return None
