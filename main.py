@@ -1,5 +1,6 @@
 ﻿import os
 from dotenv import load_dotenv
+from services.text_normalizer import normalize_text
 
 from services.recorder import record_audio
 from services.speech_service import transcribe
@@ -13,8 +14,9 @@ print("APIキー読み込み確認:", api_key[:5])
 
 def main():
 
-    audio_file = record_audio(duration=5)
+    audio_file = record_audio()
     text = transcribe(audio_file)
+    text = normalize_text(text)
     print("認識結果:", text)
 
     command = parse_command(text)
@@ -23,7 +25,8 @@ def main():
     update_inventory(
         command["item"],
         command["quantity"],
-        command["action"]
+        command["action"],
+        command["counterparty_department"]
     )
 
 if __name__ == "__main__":
