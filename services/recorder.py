@@ -1,11 +1,29 @@
 ﻿import sounddevice as sd
-from scipy.io.wavfile import write
+import soundfile as sf
 import numpy as np
 
-def record_audio(filename="input.wav", duration=5, fs=44100):
-    print("録音開始...")
-    recording = sd.rec(int(duration * fs), samplerate=fs, channels=1)
-    sd.wait()
-    write(filename, fs, recording)
-    print("録音終了")
+def record_audio(filename="input.wav"):
+    fs = 44100
+    device_id = 0
+    recording = []
+    is_recording = True
+
+    def callback(indata, frames, time, status):
+        if status:
+            print(status)
+        recording.append(indata.copy())
+
+    print("Recording... Press Enter to stop.")
+    
+    with sd.InputStream(samplerate=fs,
+                        channels=1,
+                        dtype='float32',
+                        device=device_id,
+                        callback=callback):
+        input()  # Enterで停止
+    
+    audio = np.concatenate(recording, axis=0)
+    sf.write(filename, audio, fs)
+
+    print("Recording finished")
     return filename

@@ -1,5 +1,7 @@
 .env
 venv/
+.vs/
+*.wav
 済/
 # Python キャッシュファイル
 *.pyc
