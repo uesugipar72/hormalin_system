@@ -1,11 +1,16 @@
-ï»¿import whisper
+import whisper
 
 model = whisper.load_model("medium")
 
 def transcribe(file_path):
+
     result = model.transcribe(
         file_path,
-        language="ja",
-        fp16=False  # CPUç’°å¢ƒãªã‚‰å¿…é ˆ
+        language="ja"
     )
-    return result["text"]
+
+    text = result["text"]
+
+    print("”F¯Œ‹‰Ê:", text)
+
+    return text

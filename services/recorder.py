@@ -3,10 +3,11 @@ import soundfile as sf
 import numpy as np
 
 def record_audio(filename="input.wav"):
-    fs = 44100
-    device_id = 0
+    fs = 16000
+    device_id = 1
+    channels = 1
+
     recording = []
-    is_recording = True
 
     def callback(indata, frames, time, status):
         if status:
@@ -14,16 +15,20 @@ def record_audio(filename="input.wav"):
         recording.append(indata.copy())
 
     print("Recording... Press Enter to stop.")
-    
-    with sd.InputStream(samplerate=fs,
-                        channels=1,
-                        dtype='float32',
-                        device=device_id,
-                        callback=callback):
-        input()  # Enterで停止
-    
+
+    with sd.InputStream(
+        samplerate=fs,
+        channels=channels,
+        dtype='float32',
+        device=device_id,
+        callback=callback
+    ):
+        input()
+
+    if len(recording) == 0:
+        raise Exception("録音データが取得できませんでした（マイク入力なし）")
+
     audio = np.concatenate(recording, axis=0)
-    sf.write(filename, audio, fs)
 
     print("Recording finished")
     return filename

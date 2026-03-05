@@ -1,33 +1,66 @@
-﻿import os
-from dotenv import load_dotenv
-from services.text_normalizer import normalize_text
+﻿from services.recorder import record_audio
+from services.speech_to_text import transcribe
+from services.text_normalizer import normalize_text,separate_action_and_number
+from services.item_matcher import detect_item
+from services.ai_parser import parse_department
 
-from services.recorder import record_audio
-from services.speech_service import transcribe
-from services.ai_parser import parse_command
-from services.inventory_service import update_inventory
+import re
 
-load_dotenv()
 
-api_key = os.getenv("OPENAI_API_KEY")
-print("APIキー読み込み確認:", api_key[:5])
+def extract_quantity(text):
+
+    m = re.search(r'\d+',text)
+
+    if m:
+        return int(m.group())
+
+    return 0
+
+
+def detect_action(text):
+
+    if "出庫" in text:
+        return "出庫"
+
+    if "入庫" in text:
+        return "入庫"
+
+    return None
+
 
 def main():
 
-    audio_file = record_audio()
-    text = transcribe(audio_file)
+    audio = record_audio()
+
+    text = transcribe(audio)
+
     text = normalize_text(text)
-    print("認識結果:", text)
 
-    command = parse_command(text)
-    print("解析結果:", command)
+    text = separate_action_and_number(text)
 
-    update_inventory(
-        command["item"],
-        command["quantity"],
-        command["action"],
-        command["counterparty_department"]
-    )
+    print("正規化:",text)
+
+    item = detect_item(text)
+
+    quantity = extract_quantity(text)
+
+    action = detect_action(text)
+
+    dept = parse_department(text)
+
+    result = {
+
+        "name":item,
+        "action":action,
+        "quantity":quantity,
+        "department":dept["department"]
+
+    }
+
+    print("解析結果")
+
+    print(result)
+
 
 if __name__ == "__main__":
     main()
