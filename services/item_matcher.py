@@ -1,27 +1,20 @@
-import sqlite3
+import pandas as pd
+from difflib import get_close_matches
 
-DB_PATH = "formalin.db"
+# •i–ÚDB
+items = pd.read_csv("data/items.csv")
 
-def load_items():
+def match_item(text):
 
-    conn = sqlite3.connect(DB_PATH)
-    cur = conn.cursor()
+    item_names = items["item_name"].tolist()
 
-    cur.execute("SELECT name FROM chemicals")
+    match = get_close_matches(text, item_names, n=1, cutoff=0.5)
 
-    items = [row[0] for row in cur.fetchall()]
-
-    conn.close()
-
-    return items
-
-
-def detect_item(text):
-
-    items = load_items()
-
-    for item in items:
-        if item in text:
-            return item
+    if match:
+        row = items[items["item_name"] == match[0]].iloc[0]
+        return {
+            "id": int(row["item_id"]),
+            "name": row["item_name"]
+        }
 
     return None

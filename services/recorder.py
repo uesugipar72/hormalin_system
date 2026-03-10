@@ -3,8 +3,9 @@ import soundfile as sf
 import numpy as np
 
 def record_audio(filename="input.wav"):
+
     fs = 16000
-    device_id = 1
+    device_id = 1      # Logi C270 マイク
     channels = 1
 
     recording = []
@@ -14,21 +15,29 @@ def record_audio(filename="input.wav"):
             print(status)
         recording.append(indata.copy())
 
-    print("Recording... Press Enter to stop.")
+    print("録音開始... Enterキーで終了")
 
-    with sd.InputStream(
-        samplerate=fs,
-        channels=channels,
-        dtype='float32',
-        device=device_id,
-        callback=callback
-    ):
-        input()
+    try:
+        with sd.InputStream(
+                samplerate=fs,
+                channels=channels,
+                dtype="float32",
+                device=device_id,
+                callback=callback):
+
+            input()  # Enter待ち
+
+    except Exception as e:
+        print("録音エラー:", e)
+        return None
 
     if len(recording) == 0:
-        raise Exception("録音データが取得できませんでした（マイク入力なし）")
+        print("録音データがありません")
+        return None
 
     audio = np.concatenate(recording, axis=0)
 
-    print("Recording finished")
+    sf.write(filename, audio, fs)
+
+    print("録音終了")
     return filename

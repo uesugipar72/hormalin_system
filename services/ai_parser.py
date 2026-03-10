@@ -1,33 +1,43 @@
-﻿from gpt4all import GPT4All
+﻿from openai import OpenAI
 import json
 import re
 
-model = GPT4All("Meta-Llama-3-8B-Instruct.Q4_0.gguf")
+client = OpenAI()
 
-def parse_department(text):
+def parse_with_llm(text):
 
     prompt = f"""
-次の文章から部署名だけ抽出してください。
-JSONのみ出力してください。
+あなたは医療在庫管理AIです。
+次の文章からJSONのみ出力してください。
 
-文章
+文章:
 {text}
 
-出力
+出力形式:
 {{
+ "item": "品名",
+ "action": "入庫 または 出庫",
+ "quantity": 数値,
  "department": "部署名"
 }}
+
+JSONのみ出力
 """
 
-    with model.chat_session():
-        response = model.generate(prompt,max_tokens=200)
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "user", "content": prompt}
+        ],
+        temperature=0
+    )
 
-    match = re.search(r'\{.*\}', response, re.DOTALL)
+    content = response.choices[0].message.content
 
+    # JSON抽出
+    match = re.search(r'\{.*\}', content, re.DOTALL)
     if match:
-        try:
-            return json.loads(match.group())
-        except:
-            return {"department":None}
+        return json.loads(match.group())
 
-    return {"department":None}
+    print("JSON解析失敗:", content)
+    return None

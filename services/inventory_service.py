@@ -1,38 +1,26 @@
 ﻿import sqlite3
 
-def update_inventory(name, qty, action):
+def update_inventory(item_id, action, qty):
 
-    conn = sqlite3.connect("database/formalin.db")
-    cursor = conn.cursor()
+    conn = sqlite3.connect("formalin.db")
 
-    cursor.execute("SELECT id FROM chemicals WHERE name=?", (name,))
-    row = cursor.fetchone()
+    cur = conn.cursor()
 
-    if not row:
-        print("薬品が登録されていません")
-        return
+    if action == "入庫":
 
-    chemical_id = row[0]
+        cur.execute("""
+        UPDATE items
+        SET stock = stock + ?
+        WHERE item_id = ?
+        """,(qty,item_id))
 
-    cursor.execute("SELECT quantity FROM inventory WHERE chemical_id=?", (chemical_id,))
-    row = cursor.fetchone()
-
-    current_qty = row[0] if row else 0
-
-    if action == "IN":
-        new_qty = current_qty + qty
     else:
-        new_qty = current_qty - qty
 
-    if new_qty < 0:
-        print("在庫不足")
-        return
-
-    cursor.execute("""
-        INSERT OR REPLACE INTO inventory (chemical_id, quantity)
-        VALUES (?, ?)
-    """, (chemical_id, new_qty))
+        cur.execute("""
+        UPDATE items
+        SET stock = stock - ?
+        WHERE item_id = ?
+        """,(qty,item_id))
 
     conn.commit()
     conn.close()
-    print("登録完了")
