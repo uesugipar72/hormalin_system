@@ -1,0 +1,107 @@
+import tkinter as tk
+from tkinter import ttk,messagebox
+
+from services.master_service import (
+    get_chemicals,
+    get_counterparties
+)
+
+from services.inventory_service import update_inventory
+from services.alert_service import check_alert
+
+
+class InventoryGUI(tk.Tk):
+
+    def __init__(self,user):
+
+        super().__init__()
+
+        self.user_id = user[0]
+        self.username = user[1]
+        self.role = user[2]
+
+        self.title(f"ƒzƒ‹ƒ}ƒŠƒ“ŠÇ— {self.username}")
+
+        self.geometry("500x400")
+
+        self.chemical_dict = get_chemicals()
+        self.counterparty_dict = get_counterparties()
+
+        self.create_widgets()
+
+    def create_widgets(self):
+
+        ttk.Label(self,text="ƒzƒ‹ƒ}ƒŠƒ“").pack()
+
+        self.chemical_combo = ttk.Combobox(
+            self,
+            values=list(self.chemical_dict.keys())
+        )
+        self.chemical_combo.pack()
+
+        ttk.Label(self,text="“üoŒÉ").pack()
+
+        self.action_combo = ttk.Combobox(
+            self,
+            values=["“üŒÉ","oŒÉ"]
+        )
+        self.action_combo.pack()
+
+        ttk.Label(self,text="”—Ê").pack()
+
+        self.qty_entry = ttk.Entry(self)
+        self.qty_entry.pack()
+
+        ttk.Label(self,text="‘Šèæ").pack()
+
+        self.counterparty_combo = ttk.Combobox(
+            self,
+            values=list(self.counterparty_dict.keys())
+        )
+        self.counterparty_combo.pack()
+
+        ttk.Button(
+            self,
+            text="“o˜^",
+            command=self.register
+        ).pack(pady=20)
+
+    def register(self):
+
+        chemical = self.chemical_combo.get()
+        action = self.action_combo.get()
+
+        try:
+            qty = int(self.qty_entry.get())
+        except:
+            messagebox.showerror("ƒGƒ‰[","”š“ü—Í")
+            return
+
+        counterparty = self.counterparty_combo.get()
+
+        chemical_id = self.chemical_dict[chemical]
+        counterparty_id = self.counterparty_dict[counterparty]
+
+        update_inventory(
+            chemical_id,
+            action,
+            qty,
+            counterparty_id,
+            self.user_id
+        )
+
+        alerts = check_alert()
+
+        if alerts:
+
+            msg = ""
+
+            for name,qty in alerts:
+                msg += f"{name} İŒÉ{qty}\n"
+
+            messagebox.showwarning("İŒÉŒx",msg)
+
+        messagebox.showinfo("Š®—¹","“o˜^‚µ‚Ü‚µ‚½")
+
+        self.qty_entry.delete(0,tk.END)
+        self.qty_entry.focus()
