@@ -1,6 +1,6 @@
 ﻿import tkinter as tk
 from tkinter import ttk,messagebox
-
+from services.inventory_service import update_inventory
 from services.master_service import (
     get_chemicals,
     get_counterparties

@@ -1,9 +1,9 @@
 import sqlite3
 from config import DB_PATH,ALERT_LEVEL
-
+from utils.db_utils import get_connection
 def check_alert():
 
-    conn = sqlite3.connect(DB_PATH)
+    conn = get_connection()
     cur = conn.cursor()
 
     cur.execute("""

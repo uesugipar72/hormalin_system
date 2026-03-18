@@ -1,10 +1,10 @@
 import sqlite3
 from config import DB_PATH
-
+from utils.db_utils import get_connection
 def monthly_usage():
 
-    conn = sqlite3.connect(DB_PATH)
-    cur = conn.cursor()
+    conn = sqlite3.connect(DB_PATH, timeout=30)
+    cur = get_connection()
 
     cur.execute("""
 

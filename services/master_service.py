@@ -3,7 +3,7 @@ from config import DB_PATH
 
 def get_chemicals():
 
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=30)
     cur = conn.cursor()
 
     cur.execute("SELECT id,name FROM chemicals")

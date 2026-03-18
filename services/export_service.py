@@ -4,7 +4,7 @@ from config import DB_PATH
 
 def export_logs():
 
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=30)
 
     df = pd.read_sql_query("""
 

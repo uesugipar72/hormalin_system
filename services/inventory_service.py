@@ -8,49 +8,85 @@ def update_inventory(
         counterparty_id,
         user_id):
 
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=30)
     cur = conn.cursor()
 
-    cur.execute(
-        "SELECT quantity FROM inventory WHERE chemical_id=?",
-        (chemical_id,)
-    )
+    try:
 
-    before = cur.fetchone()[0]
+        # 現在在庫取得
+        cur.execute(
+            "SELECT quantity FROM inventory WHERE chemical_id=?",
+            (chemical_id,)
+        )
 
-    if action == "出庫":
-        after = before - quantity
-    else:
-        after = before + quantity
+        row = cur.fetchone()
 
-    cur.execute("""
-    UPDATE inventory
-    SET quantity=?
-    WHERE chemical_id=?
-    """,(after,chemical_id))
+        # inventoryにデータが無い場合
+        if row is None:
 
-    cur.execute("""
-    INSERT INTO transaction_logs
-    (
-        chemical_id,
-        action,
-        quantity,
-        before_quantity,
-        after_quantity,
-        counterparty_id,
-        user_id
-    )
-    VALUES (?,?,?,?,?,?,?)
-    """,
-    (
-        chemical_id,
-        action,
-        quantity,
-        before,
-        after,
-        counterparty_id,
-        user_id
-    ))
+            before = 0
 
-    conn.commit()
-    conn.close()
+            cur.execute(
+                "INSERT INTO inventory (chemical_id, quantity) VALUES (?,0)",
+                (chemical_id,)
+            )
+
+        else:
+
+            before = row[0]
+
+        # 入出庫計算
+        if action == "出庫":
+
+            if before < quantity:
+                raise ValueError("在庫不足")
+
+            after = before - quantity
+
+        else:
+
+            after = before + quantity
+
+
+        # 在庫更新
+        cur.execute("""
+        UPDATE inventory
+        SET quantity=?
+        WHERE chemical_id=?
+        """,(after,chemical_id))
+
+
+        # 履歴保存
+        cur.execute("""
+        INSERT INTO transaction_logs
+        (
+            chemical_id,
+            action,
+            quantity,
+            before_quantity,
+            after_quantity,
+            counterparty_id,
+            user_id
+        )
+        VALUES (?,?,?,?,?,?,?)
+        """,
+        (
+            chemical_id,
+            action,
+            quantity,
+            before,
+            after,
+            counterparty_id,
+            user_id
+        ))
+
+        conn.commit()
+
+    except Exception as e:
+
+        conn.rollback()
+        raise e
+
+    finally:
+
+        conn.close()

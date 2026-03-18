@@ -3,7 +3,7 @@ from config import DB_PATH
 
 def login(username,password):
 
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=30)
     cur = conn.cursor()
 
     cur.execute("""
