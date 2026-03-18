@@ -1,4 +1,4 @@
-import tkinter as tk
+ï»¿import tkinter as tk
 from tkinter import ttk,messagebox
 
 from services.master_service import (
@@ -20,7 +20,7 @@ class InventoryGUI(tk.Tk):
         self.username = user[1]
         self.role = user[2]
 
-        self.title(f"ƒzƒ‹ƒ}ƒŠƒ“ŠÇ— {self.username}")
+        self.title(f"ãƒ›ãƒ«ãƒãƒªãƒ³ç®¡ç† {self.username}")
 
         self.geometry("500x400")
 
@@ -31,7 +31,7 @@ class InventoryGUI(tk.Tk):
 
     def create_widgets(self):
 
-        ttk.Label(self,text="ƒzƒ‹ƒ}ƒŠƒ“").pack()
+        ttk.Label(self,text="ãƒ›ãƒ«ãƒãƒªãƒ³").pack()
 
         self.chemical_combo = ttk.Combobox(
             self,
@@ -39,20 +39,20 @@ class InventoryGUI(tk.Tk):
         )
         self.chemical_combo.pack()
 
-        ttk.Label(self,text="“üoŒÉ").pack()
+        ttk.Label(self,text="å…¥å‡ºåº«").pack()
 
         self.action_combo = ttk.Combobox(
             self,
-            values=["“üŒÉ","oŒÉ"]
+            values=["å…¥åº«","å‡ºåº«"]
         )
         self.action_combo.pack()
 
-        ttk.Label(self,text="”—Ê").pack()
+        ttk.Label(self,text="æ•°é‡").pack()
 
         self.qty_entry = ttk.Entry(self)
         self.qty_entry.pack()
 
-        ttk.Label(self,text="‘Šèæ").pack()
+        ttk.Label(self,text="ç›¸æ‰‹å…ˆ").pack()
 
         self.counterparty_combo = ttk.Combobox(
             self,
@@ -62,7 +62,7 @@ class InventoryGUI(tk.Tk):
 
         ttk.Button(
             self,
-            text="“o˜^",
+            text="ç™»éŒ²",
             command=self.register
         ).pack(pady=20)
 
@@ -74,7 +74,7 @@ class InventoryGUI(tk.Tk):
         try:
             qty = int(self.qty_entry.get())
         except:
-            messagebox.showerror("ƒGƒ‰[","”š“ü—Í")
+            messagebox.showerror("ã‚¨ãƒ©ãƒ¼","æ•°å­—å…¥åŠ›")
             return
 
         counterparty = self.counterparty_combo.get()
@@ -97,11 +97,11 @@ class InventoryGUI(tk.Tk):
             msg = ""
 
             for name,qty in alerts:
-                msg += f"{name} İŒÉ{qty}\n"
+                msg += f"{name} åœ¨åº«{qty}\n"
 
-            messagebox.showwarning("İŒÉŒx",msg)
+            messagebox.showwarning("åœ¨åº«è­¦å‘Š",msg)
 
-        messagebox.showinfo("Š®—¹","“o˜^‚µ‚Ü‚µ‚½")
+        messagebox.showinfo("å®Œäº†","ç™»éŒ²ã—ã¾ã—ãŸ")
 
         self.qty_entry.delete(0,tk.END)
         self.qty_entry.focus()

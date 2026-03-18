@@ -1,4 +1,4 @@
-from gui.login_gui import LoginGUI
+﻿from gui.login_gui import LoginGUI
 from services.backup_service import backup_database
 
 if __name__ == "__main__":
