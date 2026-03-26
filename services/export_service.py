@@ -1,10 +1,11 @@
 import pandas as pd
 import sqlite3
 from config import DB_PATH
-
+from utils.db_utils import get_connection
 def export_logs():
 
-    conn = sqlite3.connect(DB_PATH, timeout=30)
+    conn = get_connection()
+    cur = conn.cursor()
 
     df = pd.read_sql_query("""
 

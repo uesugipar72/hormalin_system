@@ -8,9 +8,47 @@ def create_connection():
     conn.execute("PRAGMA foreign_keys = ON;")
     return conn
 
+def create_indexes(conn):
+
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    CREATE INDEX IF NOT EXISTS idx_inventory_chemical
+    ON inventory(chemical_id)
+    """)
+
+    cursor.execute("""
+    CREATE INDEX IF NOT EXISTS idx_logs_chemical
+    ON transaction_logs(chemical_id)
+    """)
+
+    cursor.execute("""
+    CREATE INDEX IF NOT EXISTS idx_logs_created
+    ON transaction_logs(created_at)
+    """)
+
+    conn.commit()
+
 
 def create_tables(conn):
     cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS inventory_daily_snapshot(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            snapshot_date DATE NOT NULL,
+            chemical_id INTEGER NOT NULL,
+            quantity INTEGER NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(snapshot_date, chemical_id),
+            FOREIGN KEY (chemical_id) REFERENCES chemicals(id)
+        );
+    """)
+
+    cursor.execute("""
+        CREATE INDEX IF NOT EXISTS idx_snapshot_date
+        ON inventory_daily_snapshot(snapshot_date);
+    """)
+
 
     # ==========================
     # chemicals マスタ
@@ -117,10 +155,13 @@ def create_triggers(conn):
 
 
 def initialize_database():
-    conn = create_connection()
+    conn = sqlite3.connect(DB_PATH)
+
     create_tables(conn)
+    create_indexes(conn)
     create_triggers(conn)
-    insert_initial_data(conn)
+
+    conn.commit()
     conn.close()
     print("✅ データベース初期化完了")
 

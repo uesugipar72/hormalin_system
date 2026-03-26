@@ -1,9 +1,10 @@
 import sqlite3
 from config import DB_PATH
+from utils.db_utils import get_connection
 
 def get_chemicals():
 
-    conn = sqlite3.connect(DB_PATH, timeout=30)
+    conn = get_connection()
     cur = conn.cursor()
 
     cur.execute("SELECT id,name FROM chemicals")

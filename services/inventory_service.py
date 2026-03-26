@@ -1,5 +1,6 @@
 ﻿import sqlite3
 from config import DB_PATH
+from utils.db_utils import get_connection
 
 def update_inventory(
         chemical_id,
@@ -8,10 +9,19 @@ def update_inventory(
         counterparty_id,
         user_id):
 
-    conn = sqlite3.connect(DB_PATH, timeout=30)
+    conn = get_connection()
     cur = conn.cursor()
 
     try:
+
+        # inventory レコードが無ければ作成
+        cur.execute("""
+        INSERT INTO inventory (chemical_id, quantity)
+        SELECT ?, 0
+        WHERE NOT EXISTS (
+            SELECT 1 FROM inventory WHERE chemical_id = ?
+        )
+        """, (chemical_id, chemical_id))
 
         # 現在在庫取得
         cur.execute(
@@ -20,43 +30,44 @@ def update_inventory(
         )
 
         row = cur.fetchone()
+        before = row[0]
 
-        # inventoryにデータが無い場合
-        if row is None:
-
-            before = 0
-
-            cur.execute(
-                "INSERT INTO inventory (chemical_id, quantity) VALUES (?,0)",
-                (chemical_id,)
-            )
-
-        else:
-
-            before = row[0]
-
-        # 入出庫計算
+        # -------------------------
+        # 出庫
+        # -------------------------
         if action == "出庫":
 
-            if before < quantity:
+            cur.execute("""
+            UPDATE inventory
+            SET quantity = quantity - ?
+            WHERE chemical_id = ?
+            AND quantity >= ?
+            """, (quantity, chemical_id, quantity))
+
+            if cur.rowcount == 0:
                 raise ValueError("在庫不足")
 
             after = before - quantity
 
-        else:
+        # -------------------------
+        # 入庫
+        # -------------------------
+        elif action == "入庫":
+
+            cur.execute("""
+            UPDATE inventory
+            SET quantity = quantity + ?
+            WHERE chemical_id = ?
+            """, (quantity, chemical_id))
 
             after = before + quantity
 
+        else:
+            raise ValueError("不正なaction")
 
-        # 在庫更新
-        cur.execute("""
-        UPDATE inventory
-        SET quantity=?
-        WHERE chemical_id=?
-        """,(after,chemical_id))
-
-
+        # -------------------------
         # 履歴保存
+        # -------------------------
         cur.execute("""
         INSERT INTO transaction_logs
         (

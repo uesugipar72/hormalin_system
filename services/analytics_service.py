@@ -3,8 +3,8 @@ from config import DB_PATH
 from utils.db_utils import get_connection
 def monthly_usage():
 
-    conn = sqlite3.connect(DB_PATH, timeout=30)
-    cur = get_connection()
+    conn = get_connection()
+    cur = conn.cursor()
 
     cur.execute("""
 
