@@ -1,9 +1,12 @@
 import sqlite3
-from config import DB_PATH
 import sys
 from pathlib import Path
 
-sys.path.append(str(Path(__file__).resolve().parent))
+# プロジェクトルートを追加
+sys.path.append(str(Path(__file__).resolve().parents[1]))
+
+from config import DB_PATH
+
 
 def get_connection():
 

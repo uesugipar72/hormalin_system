@@ -1,0 +1,117 @@
+フォルダー パスの一覧:  ボリューム OS
+ボリューム シリアル番号は EE63-EDDE です
+C:.
+|   .env
+|   .gitignore
+|   config.py
+|   create_database.py
+|   formalin.db
+|   input.wav
+|   main.py
+|   main_onnsei .py
+|   requirements.txt
+|   tree.txt
+|   
++---.vs
+|   |   slnx.sqlite
+|   |   VSWorkspaceState.json
+|   |   
+|   +---hormalin_system
+|   |   \---CopilotIndices
+|   |       \---18.4.106.63888
+|   |               CodeChunks.db
+|   |               SemanticSymbols.db
+|   |               
+|   \---hormalin_system.slnx
+|       +---copilot-chat
+|       |   \---ad9833ed
+|       |       \---sessions
+|       +---FileContentIndex
+|       |       06b5e0b7-6505-4939-a438-0a3643ba6b16.vsidx
+|       |       6257b91b-afb2-4336-b8af-3c6a9fb1426e.vsidx
+|       |       64b721a9-2ba2-4752-9870-a99f2fc96050.vsidx
+|       |       9bc6fabf-0afc-48f6-8e80-59c936f8c997.vsidx
+|       |       b29d085b-2883-4fc8-b70d-1d54fedef57e.vsidx
+|       |       
+|       \---v18
+|               DocumentLayout.backup.json
+|               DocumentLayout.json
+|               
++---backup
+|       backup_20260316_0819.db
+|       backup_20260316_0823.db
+|       backup_20260317_0811.db
+|       backup_20260317_0817.db
+|       backup_20260319_0800.db
+|       backup_20260319_0803.db
+|       backup_20260319_0806.db
+|       backup_20260325_1158.db
+|       backup_20260326_0829.db
+|       backup_20260327_0808.db
+|       backup_20260327_0815.db
+|       backup_20260327_0816.db
+|       backup_20260330_0739.db
+|       backup_20260330_0740.db
+|       backup_20260330_0743.db
+|       
++---database
+|       db.py
+|       hormalin.db
+|       hormalin.db-shm
+|       hormalin.db-wal
+|       models.py
+|       repository.py
+|       
++---gui
+|   |   dashbord_gui.py
+|   |   hormalin_gui.py
+|   |   inventory_gui.py
+|   |   login_gui.py
+|   |   log_view.py
+|   |   
+|   \---__pycache__
+|           inventory_gui.cpython-314.pyc
+|           login_gui.cpython-314.pyc
+|           
++---services
+|   |   ai_parser.py
+|   |   alert_service.py
+|   |   analytics_service.py
+|   |   auth_service.py
+|   |   backup_service.py
+|   |   export_service.py
+|   |   inventory_service.py
+|   |   item_matcher.py
+|   |   master_service.py
+|   |   recorder.py
+|   |   speech_service.py
+|   |   speech_to_text.py
+|   |   text_normalizer.py
+|   |   __init__.py
+|   |   
+|   \---__pycache__
+|           ai_parser.cpython-314.pyc
+|           alert_service.cpython-314.pyc
+|           auth_service.cpython-314.pyc
+|           backup_service.cpython-314.pyc
+|           inventory_service.cpython-314.pyc
+|           item_matcher.cpython-314.pyc
+|           master_service.cpython-314.pyc
+|           recorder.cpython-314.pyc
+|           speech_service.cpython-314.pyc
+|           speech_to_text.cpython-314.pyc
+|           text_normalizer.cpython-314.pyc
+|           __init__.cpython-314.pyc
+|           
++---ui
+|       cli.py
+|       
++---utils
+|   |   db_utils.py
+|   |   
+|   \---__pycache__
+|           db_utils.cpython-314.pyc
+|           
+\---__pycache__
+        config.cpython-314.pyc
+        
