@@ -1,6 +1,8 @@
 ﻿import sqlite3
 from config import DB_PATH
 from utils.db_utils import get_connection
+from constants.inventory_constants import ACTION_MAP
+
 
 def update_inventory(
         chemical_id,
@@ -9,8 +11,11 @@ def update_inventory(
         counterparty_id,
         user_id):
 
+    action_code = ACTION_MAP[action]
+
     conn = get_connection()
     cur = conn.cursor()
+
 
     try:
 
@@ -30,12 +35,12 @@ def update_inventory(
         )
 
         row = cur.fetchone()
-        before = row[0]
+        before = row["quantity"]
 
         # -------------------------
         # 出庫
         # -------------------------
-        if action == "出庫":
+        if action_code == ACTION_OUT:
 
             cur.execute("""
             UPDATE inventory
@@ -52,7 +57,7 @@ def update_inventory(
         # -------------------------
         # 入庫
         # -------------------------
-        elif action == "入庫":
+        elif action == 1:
 
             cur.execute("""
             UPDATE inventory
