@@ -1,15 +1,14 @@
 ﻿import tkinter as tk
 from tkinter import ttk,messagebox
-from services.inventory_service import update_inventory
 from services.master_service import (
     get_chemicals,
     get_counterparties
 )
-
-from services.inventory_service import update_inventory
+from services.inventory_service import (
+    update_inventory,
+    get_inventory_quantity
+)
 from services.alert_service import check_alert
-
-
 class InventoryGUI(tk.Tk):
 
     def __init__(self,user):
@@ -89,19 +88,25 @@ class InventoryGUI(tk.Tk):
             counterparty_id,
             self.user_id
         )
-
         alerts = check_alert()
 
         if alerts:
-
             msg = ""
+            for name, qty in alerts:
+                msg += f"{name} 在庫 {qty} mL\n"
 
-            for name,qty in alerts:
-                msg += f"{name} 在庫{qty}\n"
+            messagebox.showwarning("在庫警告", msg)
 
-            messagebox.showwarning("在庫警告",msg)
+       # 現在在庫取得
+        current_qty = get_inventory_quantity(chemical_id)
 
-        messagebox.showinfo("完了","登録しました")
+        messagebox.showinfo(
+            "登録完了",
+            f"{chemical} の現在在庫は {current_qty}本 です"
+        )
 
-        self.qty_entry.delete(0,tk.END)
+        self.qty_entry.delete(0, tk.END)
         self.qty_entry.focus()
+        self.chemical_combo.set("")
+        self.action_combo.set("")
+        self.counterparty_combo.set("")

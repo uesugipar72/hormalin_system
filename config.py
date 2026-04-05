@@ -5,5 +5,3 @@ BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / "database" / "hormalin.db"
 
 BACKUP_DIR = "backup"
-
-ALERT_LEVEL = 20
