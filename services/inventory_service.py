@@ -1,4 +1,5 @@
 ﻿import sqlite3
+from config import DB_PATH
 from utils.db_utils import get_connection
 from constants.inventory_constants import (
     ACTION_MAP,
@@ -7,6 +8,24 @@ from constants.inventory_constants import (
     ACTION_DISPOSE
 )
 
+def get_inventory_quantity(chemical_id):
+
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
+
+    cur.execute(
+        "SELECT quantity FROM inventory WHERE chemical_id=?",
+        (chemical_id,)
+    )
+
+    row = cur.fetchone()
+
+    conn.close()
+
+    if row:
+        return row[0]
+    else:
+        return 0
 
 def update_inventory(
         chemical_id: int,

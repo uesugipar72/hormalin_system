@@ -1,7 +1,6 @@
 import pandas as pd
 from difflib import get_close_matches
 
-# •i–ÚDB
 items = pd.read_csv("data/items.csv")
 
 def match_item(text):

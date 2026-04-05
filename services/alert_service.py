@@ -1,5 +1,4 @@
 import sqlite3
-from config import DB_PATH,ALERT_LEVEL
 from utils.db_utils import get_connection
 def check_alert():
 
@@ -7,21 +6,15 @@ def check_alert():
     cur = conn.cursor()
 
     cur.execute("""
-    SELECT c.name,i.quantity
-    FROM inventory i
-    JOIN chemicals c
-    ON i.chemical_id=c.id
+        SELECT c.name, i.quantity
+        FROM inventory i
+        JOIN chemicals c
+        ON i.chemical_id = c.id
+        WHERE i.quantity <= c.alert_level
     """)
 
-    rows = cur.fetchall()
+    alerts = cur.fetchall()
 
     conn.close()
-
-    alerts = []
-
-    for name,qty in rows:
-
-        if qty <= ALERT_LEVEL:
-            alerts.append((name,qty))
 
     return alerts
