@@ -1,159 +1,29 @@
-﻿import sqlite3
-from config import DB_PATH
-from utils.db_utils import get_connection
-from constants.inventory_constants import (
-    ACTION_MAP,
-    ACTION_IN,
-    ACTION_OUT,
-    ACTION_DISPOSE
-)
+﻿from models.inventory_model import InventoryModel
 
-def get_inventory_quantity(chemical_id):
 
-    conn = sqlite3.connect(DB_PATH)
-    cur = conn.cursor()
+class InventoryService:
 
-    cur.execute(
-        "SELECT quantity FROM inventory WHERE chemical_id=?",
-        (chemical_id,)
-    )
+    def __init__(self):
 
-    row = cur.fetchone()
+        self.model = InventoryModel()
 
-    conn.close()
 
-    if row:
-        return row[0]
-    else:
-        return 0
+    def stock_in(self, chemical_id, qty):
 
-def update_inventory(
-        chemical_id: int,
-        action: str,
-        quantity: int,
-        counterparty_id: int,
-        user_id: int):
+        before = self.model.get_quantity(chemical_id)
 
-    # -----------------------------
-    # action を数値コードへ変換
-    # -----------------------------
-    action_code = ACTION_MAP.get(action)
+        after = before + qty
 
-    if action_code is None:
-        raise ValueError(f"不正なaction: {action}")
+        self.model.update_quantity(chemical_id, after)
 
-    conn = get_connection()
-    cur = conn.cursor()
 
-    try:
+    def stock_out(self, chemical_id, qty):
 
-        # -----------------------------
-        # inventory レコード自動作成
-        # -----------------------------
-        cur.execute("""
-        INSERT INTO inventory (chemical_id, quantity)
-        SELECT ?, 0
-        WHERE NOT EXISTS (
-            SELECT 1 FROM inventory WHERE chemical_id = ?
-        )
-        """, (chemical_id, chemical_id))
+        before = self.model.get_quantity(chemical_id)
 
-        # -----------------------------
-        # 現在在庫取得
-        # -----------------------------
-        cur.execute(
-            "SELECT quantity FROM inventory WHERE chemical_id=?",
-            (chemical_id,)
-        )
+        after = before - qty
 
-        row = cur.fetchone()
+        if after < 0:
+            raise Exception("在庫不足")
 
-        if row is None:
-            raise ValueError("在庫レコード取得エラー")
-
-        before = row["quantity"]
-
-        # -----------------------------
-        # 出庫
-        # -----------------------------
-        if action_code == ACTION_OUT:
-
-            if before < quantity:
-                raise ValueError("在庫不足")
-
-            after = before - quantity
-
-            cur.execute("""
-            UPDATE inventory
-            SET quantity = ?
-            WHERE chemical_id = ?
-            """, (after, chemical_id))
-
-        # -----------------------------
-        # 入庫
-        # -----------------------------
-        elif action_code == ACTION_IN:
-
-            after = before + quantity
-
-            cur.execute("""
-            UPDATE inventory
-            SET quantity = ?
-            WHERE chemical_id = ?
-            """, (after, chemical_id))
-
-        # -----------------------------
-        # 廃棄
-        # -----------------------------
-        elif action_code == ACTION_DISPOSE:
-
-            if before < quantity:
-                raise ValueError("廃棄数が在庫を超えています")
-
-            after = before - quantity
-
-            cur.execute("""
-            UPDATE inventory
-            SET quantity = ?
-            WHERE chemical_id = ?
-            """, (after, chemical_id))
-
-        else:
-            raise ValueError("未対応のaction")
-
-        # -----------------------------
-        # 履歴ログ保存
-        # -----------------------------
-        cur.execute("""
-        INSERT INTO transaction_logs
-        (
-            chemical_id,
-            action,
-            quantity,
-            before_quantity,
-            after_quantity,
-            counterparty_id,
-            user_id
-        )
-        VALUES (?,?,?,?,?,?,?)
-        """,
-        (
-            chemical_id,
-            action_code,
-            quantity,
-            before,
-            after,
-            counterparty_id,
-            user_id
-        ))
-
-        conn.commit()
-
-    except Exception as e:
-
-        conn.rollback()
-        raise e
-
-    finally:
-
-        conn.close()
+        self.model.update_quantity(chemical_id, after)
