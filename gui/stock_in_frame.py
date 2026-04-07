@@ -102,7 +102,7 @@ class StockInFrame(ttk.Frame):
         cur = conn.cursor()
 
         cur.execute(
-            "SELECT id, name FROM counterparties"
+            "SELECT id, company_name FROM counterparties"
         )
 
         rows = cur.fetchall()
@@ -110,7 +110,7 @@ class StockInFrame(ttk.Frame):
         conn.close()
 
         self.counterparty_dict = {
-            row["name"]: row["id"]
+            row["company_name"]: row["id"]
             for row in rows
         }
 
