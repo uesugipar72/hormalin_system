@@ -46,4 +46,8 @@ class App(tk.Tk):
     def show_frame(self, name):
 
         frame = self.frames[name]
+
+        if hasattr(frame, "refresh"):
+            frame.refresh()
+
         frame.tkraise()

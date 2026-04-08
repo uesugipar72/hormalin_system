@@ -52,6 +52,8 @@ class LoginFrame(ttk.Frame):
         )
 
         if user:
+
+
             # ログインユーザー保存
             self.controller.current_user = user
             # メイン画面へ
