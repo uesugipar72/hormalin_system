@@ -18,7 +18,7 @@ class App(tk.Tk):
 
         self.current_user = None
         self.title("ホルマリン管理システム")
-        self.geometry("300x200")
+        self.geometry("300x600")
 
         container = ttk.Frame(self)
         container.pack(fill="both", expand=True)

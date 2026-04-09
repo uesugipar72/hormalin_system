@@ -7,7 +7,7 @@ def login(user_id,password):
     cur = conn.cursor()
 
     cur.execute("""
-    SELECT id,user_id,name,role
+    SELECT id,user_id,user_name,role
     FROM users
     WHERE user_id=? AND password=?
     """, (user_id, password))
