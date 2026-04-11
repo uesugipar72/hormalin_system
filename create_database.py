@@ -1,7 +1,8 @@
 import sqlite3
 from pathlib import Path
 
-DB_PATH = Path(__file__).parent / "formalin.db"
+DB_PATH = Path(__file__).parent / "hormalin.db"
+print (f"📂 データベースパス: {DB_PATH}")
 
 def create_connection():
     conn = sqlite3.connect(DB_PATH)
@@ -32,26 +33,9 @@ def create_indexes(conn):
 
 def create_tables(conn):
     cursor = conn.cursor()
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS inventory_daily_snapshot(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            snapshot_date DATE NOT NULL,
-            chemical_id INTEGER NOT NULL,
-            quantity INTEGER NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            UNIQUE(snapshot_date, chemical_id),
-            FOREIGN KEY (chemical_id) REFERENCES chemicals(id)
-        );
-    """)
-
-    cursor.execute("""
-        CREATE INDEX IF NOT EXISTS idx_snapshot_date
-        ON inventory_daily_snapshot(snapshot_date);
-    """)
-
 
     # ==========================
-    # chemicals マスタ
+    # chemicals
     # ==========================
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS chemicals (
@@ -63,36 +47,7 @@ def create_tables(conn):
     """)
 
     # ==========================
-    # inventory 現在在庫
-    # ==========================
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS inventory (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        chemical_id INTEGER NOT NULL,
-        quantity REAL NOT NULL CHECK(quantity >= 0),
-        last_updated DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (chemical_id) REFERENCES chemicals(id) ON DELETE CASCADE
-    );
-    """)
-
-    # ==========================
-    # transaction_logs 入出庫履歴
-    # ==========================
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS transaction_logs (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        chemical_id INTEGER NOT NULL,
-        action TEXT CHECK(action IN ('IN','OUT')) NOT NULL,
-        quantity REAL NOT NULL CHECK(quantity > 0),
-        before_quantity REAL NOT NULL,
-        after_quantity REAL NOT NULL,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (chemical_id) REFERENCES chemicals(id)
-    );
-    """)
-
-    # ==========================
-    # users 操作ユーザー
+    # users
     # ==========================
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS users (
@@ -103,17 +58,70 @@ def create_tables(conn):
     );
     """)
 
-    # ==========================
-    # インデックス
-    # ==========================
+    # 🔥 これが不足している
     cursor.execute("""
-    CREATE INDEX IF NOT EXISTS idx_inventory_chemical
-    ON inventory (chemical_id);
+    CREATE TABLE IF NOT EXISTS counterparties (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        department_name TEXT NOT NULL UNIQUE
+    );
     """)
 
+    # ==========================
+    # transaction_types
+    # ==========================
     cursor.execute("""
-    CREATE INDEX IF NOT EXISTS idx_logs_chemical
-    ON transaction_logs (chemical_id);
+    CREATE TABLE IF NOT EXISTS transaction_types (
+        id INTEGER PRIMARY KEY,
+        name TEXT NOT NULL
+    );
+    """)
+
+    # ==========================
+    # transactions
+    # ==========================
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS transactions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        chemical_id INTEGER NOT NULL,
+        transaction_type_id INTEGER NOT NULL,
+        quantity INTEGER NOT NULL,
+        counterparty_id INTEGER,
+        user_id INTEGER,
+        note TEXT,
+        transaction_date TEXT DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (chemical_id) REFERENCES chemicals(id),
+        FOREIGN KEY (transaction_type_id) REFERENCES transaction_types(id),
+        FOREIGN KEY (counterparty_id) REFERENCES counterparties(id),
+        FOREIGN KEY (user_id) REFERENCES users(id)
+    );
+    """)
+
+    # ==========================
+    # inventory
+    # ==========================
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS inventory (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        chemical_id INTEGER NOT NULL,
+        quantity REAL NOT NULL CHECK(quantity >= 0),
+        last_updated DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (chemical_id) REFERENCES chemicals(id)
+    );
+    """)
+
+    # ==========================
+    # snapshot
+    # ==========================
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS inventory_daily_snapshot(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        snapshot_date DATE NOT NULL,
+        chemical_id INTEGER NOT NULL,
+        quantity INTEGER NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(snapshot_date, chemical_id),
+        FOREIGN KEY (chemical_id) REFERENCES chemicals(id)
+    );
     """)
 
     conn.commit()
@@ -155,15 +163,20 @@ def create_triggers(conn):
 
 
 def initialize_database():
-    conn = sqlite3.connect(DB_PATH)
+    try:
+        conn = create_connection()  # ← 修正
 
-    create_tables(conn)
-    create_indexes(conn)
-    create_triggers(conn)
+        create_tables(conn)
+        create_indexes(conn)
+        create_triggers(conn)
 
-    conn.commit()
-    conn.close()
-    print("✅ データベース初期化完了")
+        conn.commit()
+        conn.close()
+
+        print("✅ データベース初期化完了")
+
+    except Exception as e:
+        print("❌ エラー:", e)
 
 
 if __name__ == "__main__":

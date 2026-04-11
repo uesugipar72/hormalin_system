@@ -7,13 +7,21 @@ def login(user_id,password):
     cur = conn.cursor()
 
     cur.execute("""
-    SELECT id,user_id,role
+    SELECT id,user_id,user_name,role
     FROM users
     WHERE user_id=? AND password=?
     """, (user_id, password))
 
-    user = cur.fetchone()
+    row = cur.fetchone()
 
     conn.close()
 
-    return user
+    if row:
+        return {
+            "id": row[0],
+            "user_id": row[1],
+            "name": row[2],
+            "role": row[3]
+        }
+
+    return None
