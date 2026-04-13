@@ -1,4 +1,5 @@
-﻿from gui.app import App
+﻿
+from gui.app import App
 
 def main():
 

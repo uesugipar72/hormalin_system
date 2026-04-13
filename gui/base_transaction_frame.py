@@ -40,7 +40,11 @@ class BaseTransactionFrame(ttk.Frame):
         # 部署
         ttk.Label(form, text="部署").grid(row=2, column=0, padx=10, pady=5)
 
-        self.counterparty_cb = ttk.Combobox(form, width=30)
+        if self.action == "入庫":
+            self.counterparty_cb = ttk.Combobox(form, width=30, state="readonly")
+        else:
+            self.counterparty_cb = ttk.Combobox(form, width=30)
+
         self.counterparty_cb.grid(row=2, column=1)
 
         # 備考
@@ -93,7 +97,19 @@ class BaseTransactionFrame(ttk.Frame):
         conn = get_connection()
         cur = conn.cursor()
 
-        cur.execute("SELECT id,department_name FROM counterparties")
+        if self.action == "入庫":
+            # ★ デフォルト部署のみ取得
+            cur.execute("""
+                SELECT id, department_name
+                FROM counterparties
+                WHERE is_default = 1
+            """)
+        else:
+            # ★ 全部署
+            cur.execute("""
+                SELECT id, department_name
+                FROM counterparties
+            """)
 
         rows = cur.fetchall()
         conn.close()
@@ -105,6 +121,11 @@ class BaseTransactionFrame(ttk.Frame):
 
         self.counterparty_cb["values"] = list(self.counterparty_dict.keys())
 
+        # 入庫時は自動選択
+        if self.action == "入庫" and rows:
+            default_name = rows[0]["department_name"]
+            self.counterparty_cb.set(default_name)
+            self.counterparty_cb["state"] = "disabled"
     # -------------------
     # 登録処理
     # -------------------
@@ -116,16 +137,12 @@ class BaseTransactionFrame(ttk.Frame):
             chemical_name = self.chemical_cb.get()
             qty = int(self.qty_entry.get())
             counterparty_name = self.counterparty_cb.get()
+            if counterparty_name not in self.counterparty_dict:
+                raise ValueError("取引先が選択されていません")
             note = self.note_entry.get()
 
             chemical_id = self.chemical_dict[chemical_name]
             counterparty_id = self.counterparty_dict[counterparty_name]
-
-            if self.action == "入庫":
-                self.inventory_controller.stock_in(chemical_id, qty)
-
-            elif self.action == "出庫":
-                self.inventory_controller.stock_out(chemical_id, qty)
 
             conn = get_connection()
             cur = conn.cursor()

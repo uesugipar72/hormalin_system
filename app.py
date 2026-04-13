@@ -1,8 +1,8 @@
-from gui.login_gui import LoginGUI
+from gui.login_frame import LoginFrame
 
 def main():
 
-    app = LoginGUI()
+    app = LoginFrame()
     app.mainloop()
 
 
