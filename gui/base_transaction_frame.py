@@ -34,8 +34,9 @@ class BaseTransactionFrame(ttk.Frame):
         # 数量
         ttk.Label(form, text="数量").grid(row=1, column=0, padx=10, pady=5)
 
-        self.qty_entry = ttk.Entry(form)
-        self.qty_entry.grid(row=1, column=1)
+        self.qty_cb = ttk.Combobox(form, state="normal")  # ←入力も可能
+        self.qty_cb.grid(row=1, column=1)
+
 
         # 部署
         ttk.Label(form, text="部署").grid(row=2, column=0, padx=10, pady=5)
@@ -70,7 +71,7 @@ class BaseTransactionFrame(ttk.Frame):
 
         self.load_chemicals()
         self.load_counterparties()
-
+        self.set_quantity_options()
     # -------------------
     # マスタ読込
     # -------------------
@@ -128,15 +129,41 @@ class BaseTransactionFrame(ttk.Frame):
             default_name = next(iter(self.counterparty_dict))
             self.counterparty_cb.set(default_name)
             self.counterparty_cb["state"] = "disabled"
+
+    def set_quantity_options(self):
+
+        if self.action == "出庫":
+            values = list(range(1, 41))
+        else:
+            values = [20, 24, 50, 100, 150, 200, 250, 300]
+
+        self.qty_cb["values"] = values
+
+        vcmd = (self.qty_cb.register(self.validate_number), "%P")
+        self.qty_cb.configure(validate="key", validatecommand=vcmd)
+
+
+    def validate_number(self, P):
+        return P.isdigit() or P == ""
+
+    def get_action_code(self):
+        if self.action == "入庫":
+            return "IN"
+        elif self.action == "出庫":
+            return "OUT"
+        else:
+            raise ValueError("不正な操作です")
+
     # -------------------
     # 登録処理
     # -------------------
 
     def register(self):
+        action_db = self.get_action_code()
 
         try:
             chemical_name = self.chemical_cb.get()
-            qty = float(self.qty_entry.get())
+            qty = float(self.qty_cb.get())
             counterparty_name = self.counterparty_cb.get().strip()
 
             if counterparty_name not in self.counterparty_dict:
@@ -187,7 +214,7 @@ class BaseTransactionFrame(ttk.Frame):
                 VALUES (?, ?, ?, ?, ?, ?, ?)
             """, (
                 chemical_id,
-                self.action,
+                action_db,
                 qty,
                 before_qty,
                 after_qty,
@@ -205,6 +232,9 @@ class BaseTransactionFrame(ttk.Frame):
             messagebox.showerror("エラー", str(e))
 
     def clear_form(self):
+        self.qty_cb.set("")
 
-        self.qty_entry.delete(0, "end")
+        if self.qty_cb["values"]:
+            self.qty_cb.set(self.qty_cb["values"][0])  # 初期値に戻す
+
         self.note_entry.delete(0, "end")
