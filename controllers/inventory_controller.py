@@ -6,7 +6,7 @@ class InventoryController:
     def __init__(self):
 
         self.service = InventoryService()
-
+        
 
     def stock_in(self, chemical_id, qty):
 

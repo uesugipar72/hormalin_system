@@ -13,8 +13,7 @@ class BaseTransactionFrame(ttk.Frame):
         super().__init__(parent)
 
         self.controller = controller
-        self.inventory_controller = InventoryController()
-
+       
         title = ttk.Label(
             self,
             text=f"{self.action}登録",
@@ -54,6 +53,7 @@ class BaseTransactionFrame(ttk.Frame):
         self.note_entry = ttk.Entry(form, width=30)
         self.note_entry.grid(row=3, column=1)
 
+        # ボタン
         btn_frame = ttk.Frame(self)
         btn_frame.pack(pady=20)
 
@@ -72,9 +72,7 @@ class BaseTransactionFrame(ttk.Frame):
         self.load_chemicals()
         self.load_counterparties()
         self.set_quantity_options()
-    # -------------------
-    # マスタ読込
-    # -------------------
+        
 
     def load_chemicals(self):
 
@@ -130,6 +128,23 @@ class BaseTransactionFrame(ttk.Frame):
             self.counterparty_cb.set(default_name)
             self.counterparty_cb["state"] = "disabled"
 
+    def load_staff(self):
+        conn = get_connection()
+        cur = conn.cursor()
+
+        cur.execute("""
+            SELECT id, name
+            FROM users
+        """)
+
+        rows = cur.fetchall()
+        conn.close()
+
+        self.staff_dict = {
+            row["name"]: row["id"]
+            for row in rows
+        }
+
     def set_quantity_options(self):
 
         if self.action == "出庫":
@@ -165,12 +180,11 @@ class BaseTransactionFrame(ttk.Frame):
             chemical_name = self.chemical_cb.get()
             qty = float(self.qty_cb.get())
             counterparty_name = self.counterparty_cb.get().strip()
-
             if counterparty_name not in self.counterparty_dict:
                 raise ValueError("取引先が選択されていません")
 
             note = self.note_entry.get()
-
+            staff_id = self.controller.current_user_id
             chemical_id = self.chemical_dict[chemical_name]
             counterparty_id = self.counterparty_dict[counterparty_name]
 
@@ -210,7 +224,7 @@ class BaseTransactionFrame(ttk.Frame):
             # ④ ログ登録
             cur.execute("""
                 INSERT INTO transaction_logs
-                (chemical_id, action, quantity, before_quantity, after_quantity, counterparty_id, note)
+                (chemical_id, action, quantity, before_quantity, after_quantity, counterparty_id, staff_id,note)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
             """, (
                 chemical_id,
@@ -219,6 +233,7 @@ class BaseTransactionFrame(ttk.Frame):
                 before_qty,
                 after_qty,
                 counterparty_id,
+                staff_id,
                 note
             ))
 

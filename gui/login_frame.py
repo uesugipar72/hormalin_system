@@ -52,13 +52,12 @@ class LoginFrame(ttk.Frame):
         )
 
         if user:
-
-
             # ログインユーザー保存
             self.controller.current_user = user
             # メイン画面へ
+            self.controller.current_user_id = user["id"]
             self.controller.show_frame("MenuFrame")
-
+            
         else:
 
             messagebox.showerror("エラー", "ログイン失敗")
