@@ -224,8 +224,8 @@ class BaseTransactionFrame(ttk.Frame):
             # ④ ログ登録
             cur.execute("""
                 INSERT INTO transaction_logs
-                (chemical_id, action, quantity, before_quantity, after_quantity, counterparty_id, staff_id,note)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                (chemical_id, action, quantity, before_quantity, after_quantity, counterparty_id, staff_id, note)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 chemical_id,
                 action_db,
@@ -240,16 +240,14 @@ class BaseTransactionFrame(ttk.Frame):
             conn.commit()
             conn.close()
 
-            messagebox.showinfo("成功", f"{self.action}登録しました")
+            messagebox.showinfo(
+                f"{self.action}登録完了",
+                f"薬品：{chemical_name}\n在庫：{before_qty} → {after_qty}"
+            )
             self.clear_form()
 
         except Exception as e:
             messagebox.showerror("エラー", str(e))
 
     def clear_form(self):
-        self.qty_cb.set("")
-
-        if self.qty_cb["values"]:
-            self.qty_cb.set(self.qty_cb["values"][0])  # 初期値に戻す
-
-        self.note_entry.delete(0, "end")
+        self.controller.show_frame("MenuFrame")
