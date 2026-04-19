@@ -7,6 +7,11 @@ ACTION_MAP = {
     "出庫": ACTION_OUT,
     "廃棄": ACTION_DISPOSE
 }
+ACTION_CODE_LABEL = {
+    "IN": "入庫",
+    "OUT": "出庫",
+    "DISPOSE": "廃棄"
+}
 
 ACTION_LABEL = {
     1: "入庫",

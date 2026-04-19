@@ -123,7 +123,22 @@ def create_tables(conn):
         FOREIGN KEY (chemical_id) REFERENCES chemicals(id)
     );
     """)
-
+    cursor.execute(""" 
+    CREATE TABLE IF NOT EXISTS poison_logs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        chemical_id INTEGER,
+        user_id INTEGER,
+        department_id INTEGER,
+        action TEXT,
+        quantity INTEGER,
+        after_quantity INTEGER,
+        note TEXT,
+        created_at TEXT,
+        FOREIGN KEY (chemical_id) REFERENCES chemicals(id),
+        FOREIGN KEY (user_id) REFERENCES users(id),
+        FOREIGN KEY (department_id) REFERENCES departments(id)
+    );
+    """)
     conn.commit()
 
 

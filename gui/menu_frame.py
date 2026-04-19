@@ -35,6 +35,22 @@ class MenuFrame(ttk.Frame):
 
         ttk.Button(
             self,
+            text="劇毒物管理簿",
+            command=lambda: controller.show_frame("PoisonLedgerFrame")
+        ).pack(pady=10)    
+
+        ttk.Button(
+            self,
             text="マスタ設定",
             command=lambda: controller.show_frame("MasterFrame")
         ).pack(pady=10)
+
+      # ★ 終了ボタン追加
+        ttk.Button(
+            self,
+            text="終了",
+            command=self.quit_app
+        ).pack(pady=30)
+
+    def quit_app(self):
+        self.master.destroy()

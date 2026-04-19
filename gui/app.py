@@ -8,20 +8,26 @@ from gui.stock_out_frame import StockOutFrame
 from gui.history_frame import HistoryFrame
 from gui.inventory_frame import InventoryFrame
 from gui.master_frame import MasterFrame
-
+from gui.poison_ledger_frame import PoisonLedgerFrame
 
 class App(tk.Tk):
-
     def __init__(self):
-
         super().__init__()
 
         self.current_user = None
         self.title("ホルマリン管理システム")
-        self.geometry("300x600")
+        self.geometry("400x300")  # ← サイズも調整
+
+        # 👇 gridに統一
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
 
         container = ttk.Frame(self)
-        container.pack(fill="both", expand=True)
+        container.grid(row=0, column=0, sticky="nsew")
+
+        # 👇 これも重要（中央配置効かせる）
+        container.grid_rowconfigure(0, weight=1)
+        container.grid_columnconfigure(0, weight=1)
 
         self.frames = {}
 
@@ -32,6 +38,7 @@ class App(tk.Tk):
             StockOutFrame,
             HistoryFrame,
             InventoryFrame,
+            PoisonLedgerFrame,
             MasterFrame
         )
 
