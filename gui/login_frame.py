@@ -7,45 +7,41 @@ from services.auth_service import login
 class LoginFrame(ttk.Frame):
 
     def __init__(self, parent, controller):
-
         super().__init__(parent)
 
         self.controller = controller
-
-        # 画面全体を中央寄せ
+# 👇 ここに追加
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
-        main_frame = ttk.Frame(self)
-        main_frame.grid(row=0, column=0)
+        # 👇 main_frameの作成を修正
+        main_frame = ttk.Frame(self, padding=20, relief="solid", borderwidth=1)
+        main_frame.grid(row=0, column=0, padx=50, pady=50)
+        # 背景スタイル
+        style = ttk.Style()
+        style.configure("Login.TFrame", background="#f5f5f5")
+        self.configure(style="Login.TFrame")
 
-        # タイトル
-        ttk.Label(
-            main_frame,
-            text="ログイン",
-            font=("Meiryo", 18)
-        ).grid(row=0, column=0, columnspan=2, pady=20)
+        # 中央ダイアログ
+        main_frame = ttk.Frame(self, padding=20, relief="solid", borderwidth=1)
+        main_frame.place(relx=0.5, rely=0.5, anchor="center")
 
-        # ユーザー
+        ttk.Label(main_frame, text="ログイン", font=("Meiryo", 18)).grid(
+            row=0, column=0, columnspan=2, pady=20
+        )
+
         ttk.Label(main_frame, text="ユーザー").grid(row=1, column=0, sticky="e", padx=10, pady=5)
-
         self.user_entry = ttk.Entry(main_frame, width=25)
         self.user_entry.grid(row=1, column=1, pady=5)
 
-        # パスワード
         ttk.Label(main_frame, text="パスワード").grid(row=2, column=0, sticky="e", padx=10, pady=5)
-
         self.pass_entry = ttk.Entry(main_frame, show="*", width=25)
         self.pass_entry.grid(row=2, column=1, pady=5)
 
-        # ボタン
-        ttk.Button(
-            main_frame,
-            text="ログイン",
-            command=self.login
-        ).grid(row=3, column=0, columnspan=2, pady=20)
+        ttk.Button(main_frame, text="ログイン", command=self.login).grid(
+            row=3, column=0, columnspan=2, pady=20
+        )
 
-        # Enterキー
         self.user_entry.bind("<Return>", self.focus_password)
         self.pass_entry.bind("<Return>", self.enter_login)
 

@@ -14,20 +14,11 @@ class App(tk.Tk):
     def __init__(self):
         super().__init__()
 
-        self.current_user = None
         self.title("ホルマリン管理システム")
-        self.geometry("400x300")  # ← サイズも調整
-
-        # 👇 gridに統一
-        self.grid_rowconfigure(0, weight=1)
-        self.grid_columnconfigure(0, weight=1)
+        self.geometry("")  # 自動サイズ
 
         container = ttk.Frame(self)
         container.grid(row=0, column=0, sticky="nsew")
-
-        # 👇 これも重要（中央配置効かせる）
-        container.grid_rowconfigure(0, weight=1)
-        container.grid_columnconfigure(0, weight=1)
 
         self.frames = {}
 
@@ -51,10 +42,18 @@ class App(tk.Tk):
         self.show_frame("LoginFrame")
 
     def show_frame(self, name):
-
         frame = self.frames[name]
 
         if hasattr(frame, "refresh"):
             frame.refresh()
 
         frame.tkraise()
+
+        self.update_idletasks()
+
+        if name == "LoginFrame":
+            self.geometry("480x460")
+            self.resizable(False, False)
+        else:
+            self.geometry("")
+            self.resizable(True, True)
