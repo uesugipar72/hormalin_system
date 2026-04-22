@@ -6,25 +6,28 @@ from services.auth_service import login
 
 class LoginFrame(ttk.Frame):
 
+    window_size = "480x460"
+    resizable = (False, False)
+
     def __init__(self, parent, controller):
         super().__init__(parent)
 
+       
+
         self.controller = controller
-# 👇 ここに追加
+        # 👇 ここに追加
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
+        # コンテナ（中央寄せ用）
+        container = ttk.Frame(self)
+        container.grid(row=0, column=0, sticky="nsew")
 
-        # 👇 main_frameの作成を修正
-        main_frame = ttk.Frame(self, padding=20, relief="solid", borderwidth=1)
-        main_frame.grid(row=0, column=0, padx=50, pady=50)
-        # 背景スタイル
-        style = ttk.Style()
-        style.configure("Login.TFrame", background="#f5f5f5")
-        self.configure(style="Login.TFrame")
+        container.grid_rowconfigure(0, weight=1)
+        container.grid_columnconfigure(0, weight=1)
 
         # 中央ダイアログ
-        main_frame = ttk.Frame(self, padding=20, relief="solid", borderwidth=1)
-        main_frame.place(relx=0.5, rely=0.5, anchor="center")
+        main_frame = ttk.Frame(container, padding=20, relief="solid", borderwidth=1)
+        main_frame.grid(row=0, column=0)
 
         ttk.Label(main_frame, text="ログイン", font=("Meiryo", 18)).grid(
             row=0, column=0, columnspan=2, pady=20
