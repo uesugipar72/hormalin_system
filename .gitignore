@@ -12,3 +12,4 @@ __pycache__/
 # pdfファイルを無視
 *.pdf
 database/hormalin.db
+*.db
