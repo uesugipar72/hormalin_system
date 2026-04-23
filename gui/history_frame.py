@@ -2,39 +2,40 @@ import tkinter as tk
 from tkinter import ttk
 from services.history_service import get_history
 
+
+
 class HistoryFrame(ttk.Frame):
-    window_size = "1000x700"
-    resizable = (True, True)
 
     def __init__(self, parent, controller):
-
         super().__init__(parent)
 
-        label = ttk.Label(
-            self,
-            text="取引履歴画面"
-        )
-        label.pack(pady=20)
+        ttk.Label(self, text="取引履歴画面").pack(pady=10)
 
-        btn = ttk.Button(
+        # ▼ Treeview追加（これがないと表示できない）
+        columns = ("日時", "器材", "区分", "数量")
+
+        self.tree = ttk.Treeview(self, columns=columns, show="headings")
+        self.tree.pack(fill="both", expand=True, padx=10, pady=10)
+
+        for col in columns:
+            self.tree.heading(col, text=col)
+
+        ttk.Button(
             self,
             text="メニューに戻る",
             command=lambda: controller.show_frame("MenuFrame")
-        )
-        btn.pack()
+        ).pack(pady=10)
 
     def refresh(self):
-        # ① データ取得
         data = self.get_history_data()
 
-        # ② 既存データ削除
+        # 既存削除
         for row in self.tree.get_children():
             self.tree.delete(row)
 
-        # ③ 再表示
+        # 再表示
         for row in data:
             self.tree.insert("", "end", values=row)
 
     def get_history_data(self):
-        from services.history_service import get_history
         return get_history()
