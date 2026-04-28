@@ -85,7 +85,11 @@ class BaseTransactionFrame(ttk.Frame):
         conn.row_factory = sqlite3.Row
         cur = conn.cursor()
 
-        cur.execute("SELECT id, name FROM chemicals")
+        cur.execute("""
+            SELECT id, name
+            FROM chemicals
+            ORDER BY display_order
+            """)
 
         rows = cur.fetchall()
         conn.close()
@@ -113,6 +117,7 @@ class BaseTransactionFrame(ttk.Frame):
             cur.execute("""
                 SELECT id, department_name
                 FROM departments
+                ORDER BY display_order
             """)
 
         rows = cur.fetchall()
@@ -229,10 +234,24 @@ class BaseTransactionFrame(ttk.Frame):
                 f"薬品：{chemical_name}\n在庫：{before_qty} → {after_qty}"
             )
 
-            self.clear_form()
+            self.reset_form()
 
         except Exception as e:
             messagebox.showerror("エラー", str(e))
 
-    def clear_form(self):
+    def reset_form(self):
+        # コンボボックス
+        self.chemical_cb.set("")
+        self.qty_cb.set("")
+        self.department_cb.set("")
+
+        # Entry
+        self.note_entry.delete(0, "end")
+
+        # 入庫の場合はデフォルト再設定
+        if self.action == "入庫" and self.department_dict:
+            default_name = next(iter(self.department_dict))
+            self.department_cb.set(default_name)
+
+    def go_menu(self):
         self.controller.show_frame("MenuFrame")

@@ -1,5 +1,5 @@
 ﻿from models.inventory_model import InventoryModel
-
+from utils.db_utils import get_connection
 
 class InventoryService:
 
@@ -27,3 +27,23 @@ class InventoryService:
             raise Exception("在庫不足")
 
         self.model.update_quantity(chemical_id, after)
+
+    def get_inventory(self):
+
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT c.name, i.quantity
+            FROM inventory i
+            JOIN chemicals c ON i.chemical_id = c.id
+        """)
+
+        rows = cursor.fetchall()
+        conn.close()
+
+        # dict形式に変換
+        return [
+            {"name": row[0], "qty": row[1]}
+            for row in rows
+        ]

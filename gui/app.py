@@ -9,10 +9,12 @@ from gui.history_frame import HistoryFrame
 from gui.inventory_frame import InventoryFrame
 from gui.master_frame import MasterFrame
 from gui.poison_ledger_frame import PoisonLedgerFrame
+from controllers.inventory_controller import InventoryController
 
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
+        self.inventory_controller = InventoryController()
 
         self.title("ホルマリン管理システム")
         self.geometry("")  # 自動サイズ
@@ -49,11 +51,14 @@ class App(tk.Tk):
 
     def show_frame(self, name):
         frame = self.frames[name]
+        frame.tkraise()
+
+        if hasattr(frame, "reset_form"):
+            frame.reset_form()
 
         if hasattr(frame, "refresh"):
             frame.refresh()
 
-        frame.tkraise()
         self.update_idletasks()
 
         # 👇 フレームに定義された設定を使う
@@ -62,3 +67,5 @@ class App(tk.Tk):
 
         self.geometry(size)
         self.resizable(*resizable)
+
+   
