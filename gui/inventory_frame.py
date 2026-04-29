@@ -1,7 +1,10 @@
+from ctypes.wintypes import SIZE
 from tkinter import ttk
 
 
 class InventoryFrame(ttk.Frame):
+
+    window_size = "200x300"
 
     def __init__(self, parent, controller):
 
@@ -11,7 +14,7 @@ class InventoryFrame(ttk.Frame):
 
         self.user_label = ttk.Label(
             self,
-            font=("Meiryo", 14)
+            font=("Meiryo", 11)
         )
         self.user_label.pack(pady=20)
 
@@ -22,7 +25,7 @@ class InventoryFrame(ttk.Frame):
 
         style = ttk.Style()
         style.configure("Treeview", font=("Meiryo", 12), rowheight=28)
-        style.configure("Treeview.Heading", font=("Meiryo", 13, "bold"))
+        style.configure("Treeview.Heading", font=("Meiryo", 10, "bold"))
 
         self.tree = ttk.Treeview(
             self,
@@ -30,7 +33,7 @@ class InventoryFrame(ttk.Frame):
             show="headings"
         )
 
-        self.tree.column("name", width=250)
+        self.tree.column("name", width=200)
         self.tree.column("qty", width=100, anchor="center")
 
         self.tree.heading("name", text="ホルマリン種別")

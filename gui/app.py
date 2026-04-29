@@ -53,19 +53,26 @@ class App(tk.Tk):
         frame = self.frames[name]
         frame.tkraise()
 
+        # 👇 フレームに定義された設定を使う
+        size = getattr(frame, "window_size", "800x600")
+        resizable = getattr(frame, "resizable", (True, True))
+        
+        self.geometry(size)
+        self.resizable(*resizable)
+
+        self.update_idletasks()
+
+
         if hasattr(frame, "reset_form"):
             frame.reset_form()
 
         if hasattr(frame, "refresh"):
             frame.refresh()
 
-        self.update_idletasks()
+        
 
-        # 👇 フレームに定義された設定を使う
-        size = getattr(frame, "window_size", "800x600")
-        resizable = getattr(frame, "resizable", (True, True))
+        
 
-        self.geometry(size)
-        self.resizable(*resizable)
+        
 
    
