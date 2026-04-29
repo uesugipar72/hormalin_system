@@ -16,3 +16,7 @@ class InventoryController:
     def stock_out(self, chemical_id, qty):
 
         self.service.stock_out(chemical_id, qty)
+
+    def get_inventory_list(self):
+
+        return self.service.get_inventory()

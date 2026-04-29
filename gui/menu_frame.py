@@ -11,12 +11,6 @@ class MenuFrame(ttk.Frame):
 
         ttk.Button(
             self,
-            text="在庫確認",
-            command=lambda: controller.show_frame("InventoryFrame")
-        ).pack(pady=10)
-
-        ttk.Button(
-            self,
             text="入庫",
             command=lambda: controller.show_frame("StockInFrame")
         ).pack(pady=10)
@@ -25,6 +19,12 @@ class MenuFrame(ttk.Frame):
             self,
             text="出庫",
             command=lambda: controller.show_frame("StockOutFrame")
+        ).pack(pady=10)
+        
+        ttk.Button(
+            self,
+            text="在庫確認",
+            command=lambda: controller.show_frame("InventoryFrame")
         ).pack(pady=10)
 
         ttk.Button(

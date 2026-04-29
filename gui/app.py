@@ -9,16 +9,24 @@ from gui.history_frame import HistoryFrame
 from gui.inventory_frame import InventoryFrame
 from gui.master_frame import MasterFrame
 from gui.poison_ledger_frame import PoisonLedgerFrame
+from controllers.inventory_controller import InventoryController
 
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
+        self.inventory_controller = InventoryController()
 
         self.title("ホルマリン管理システム")
         self.geometry("")  # 自動サイズ
+        
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
 
         container = ttk.Frame(self)
         container.grid(row=0, column=0, sticky="nsew")
+                       
+        container.grid_rowconfigure(0, weight=1)
+        container.grid_columnconfigure(0, weight=1)
 
         self.frames = {}
 
@@ -43,17 +51,21 @@ class App(tk.Tk):
 
     def show_frame(self, name):
         frame = self.frames[name]
+        frame.tkraise()
+
+        if hasattr(frame, "reset_form"):
+            frame.reset_form()
 
         if hasattr(frame, "refresh"):
             frame.refresh()
 
-        frame.tkraise()
-
         self.update_idletasks()
 
-        if name == "LoginFrame":
-            self.geometry("480x460")
-            self.resizable(False, False)
-        else:
-            self.geometry("")
-            self.resizable(True, True)
+        # 👇 フレームに定義された設定を使う
+        size = getattr(frame, "window_size", "800x600")
+        resizable = getattr(frame, "resizable", (True, True))
+
+        self.geometry(size)
+        self.resizable(*resizable)
+
+   
