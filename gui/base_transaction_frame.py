@@ -86,7 +86,7 @@ class BaseTransactionFrame(ttk.Frame):
         cur = conn.cursor()
 
         cur.execute("""
-            SELECT id, name
+            SELECT id, name, quantity_per_unit
             FROM chemicals
             ORDER BY display_order
             """)
@@ -95,10 +95,12 @@ class BaseTransactionFrame(ttk.Frame):
         conn.close()
 
         self.chemical_dict = {
-            row["name"]: row["id"]
+            row["name"]: {
+            "id": row["id"],
+            "quantity_per_unit": row["quantity_per_unit"]
+            }
             for row in rows
         }
-
         self.chemical_cb["values"] = list(self.chemical_dict.keys())
 
     def load_department(self):
@@ -165,15 +167,21 @@ class BaseTransactionFrame(ttk.Frame):
 
         try:
             chemical_name = self.chemical_cb.get()
-            qty = float(self.qty_cb.get())
+            input_box_qty = int(self.qty_cb.get())
+            chemical_data = self.chemical_dict[chemical_name]
+            chemical_id = chemical_data["id"]
+            quantity_per_unit = chemical_data["quantity_per_unit"]
+            
+            
+            # ← 箱数
             department_name = self.department_cb.get().strip()
 
             if department_name not in self.department_dict:
                 raise ValueError("部署が選択されていません")
 
             note = self.note_entry.get()
+            note = f"{input_box_qty}箱" if not note else f"{input_box_qty}箱 / {note}
             staff_id = self.controller.current_user_id
-            chemical_id = self.chemical_dict[chemical_name]
             department_id = self.department_dict[department_name]
 
             conn = get_connection()
@@ -195,10 +203,13 @@ class BaseTransactionFrame(ttk.Frame):
 
             # 計算
             if self.action == "入庫":
-                after_qty = before_qty + qty
+                actual_qty = input_box_qty * quantity_per_unit
+                after_qty = before_qty + actual_qty
                 action_db = "IN"
             else:
-                after_qty = before_qty - qty
+
+                actual_qty = input_box_qty  # 出庫はそのまま（必要なら後で変更）
+                after_qty = before_qty - actual_qty
                 if after_qty < 0:
                     raise ValueError("在庫不足です")
                 action_db = "OUT"
@@ -218,7 +229,7 @@ class BaseTransactionFrame(ttk.Frame):
             """, (
                 chemical_id,
                 action_db,
-                qty,
+                actual_qty,
                 before_qty,
                 after_qty,
                 department_id,
