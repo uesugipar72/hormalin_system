@@ -6,7 +6,7 @@ from services.auth_service import login
 
 class LoginFrame(ttk.Frame):
 
-    window_size = "250x300"
+    window_size = "300x300"
     resizable = (False, False)
 
     def __init__(self, parent, controller):

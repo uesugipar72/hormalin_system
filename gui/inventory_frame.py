@@ -1,10 +1,9 @@
-from ctypes.wintypes import SIZE
 from tkinter import ttk
 
 
 class InventoryFrame(ttk.Frame):
 
-    window_size = "200x300"
+    window_size = "300x500"
 
     def __init__(self, parent, controller):
 
@@ -20,17 +19,23 @@ class InventoryFrame(ttk.Frame):
 
         ttk.Label(
             self,
-            text="器材管理システム メイン画面"
+            text="ホルマリン在庫状況"
         ).pack()
 
+       
         style = ttk.Style()
         style.configure("Treeview", font=("Meiryo", 12), rowheight=28)
         style.configure("Treeview.Heading", font=("Meiryo", 10, "bold"))
 
+        table_frame = ttk.Frame(self)
+        table_frame.pack(fill="both", expand=True)
+
+
         self.tree = ttk.Treeview(
-            self,
+            table_frame,
             columns=("name", "qty"),
-            show="headings"
+            show="headings",
+            height = 8
         )
 
         self.tree.column("name", width=200)
@@ -41,6 +46,15 @@ class InventoryFrame(ttk.Frame):
 
         self.tree.pack(fill="both", expand=True, padx=20, pady=20)
 
+        # メニューに戻るボタン
+        button_frame = ttk.Frame(self)
+        button_frame.pack(fill="x")
+        back_btn = ttk.Button(
+            button_frame,
+            text="メニューに戻る",
+            command=lambda: controller.show_frame("MenuFrame")
+        )
+        back_btn.pack(pady=10)
        
 
     def load_inventory(self):
