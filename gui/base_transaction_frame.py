@@ -33,7 +33,8 @@ class BaseTransactionFrame(ttk.Frame):
         self.chemical_cb.grid(row=0, column=1)
 
         # 数量
-        ttk.Label(form, text="数量").grid(row=1, column=0, padx=10, pady=5)
+        label_text = "箱数" if self.action == "入庫" else "数量"
+        ttk.Label(form, text=label_text).grid(row=1, column=0, padx=10, pady=5)
 
         self.qty_cb = ttk.Combobox(form, state="normal")
         self.qty_cb.grid(row=1, column=1)
@@ -146,8 +147,7 @@ class BaseTransactionFrame(ttk.Frame):
         if self.action == "出庫":
             values = list(range(1, 41))
         else:
-            values = [20, 24, 50, 100, 150, 200, 250, 300]
-
+            values = list(range(1, 5))
         self.qty_cb["values"] = values
 
         vcmd = (self.qty_cb.register(self.validate_number), "%P")
@@ -180,7 +180,7 @@ class BaseTransactionFrame(ttk.Frame):
                 raise ValueError("部署が選択されていません")
 
             note = self.note_entry.get()
-            note = f"{input_box_qty}箱" if not note else f"{input_box_qty}箱 / {note}
+            note = f"{input_box_qty}箱" if not note else f"{input_box_qty}箱 / {note}"
             staff_id = self.controller.current_user_id
             department_id = self.department_dict[department_name]
 
@@ -197,9 +197,13 @@ class BaseTransactionFrame(ttk.Frame):
             row = cur.fetchone()
 
             if row is None:
-                raise ValueError("在庫データが存在しません")
-
-            before_qty = row["quantity"]
+                before_qty = 0
+                cur.execute("""
+                    INSERT INTO inventory (chemical_id, quantity)
+                    VALUES (?, 0)
+                """, (chemical_id,))
+            else:
+                before_qty = row["quantity"]
 
             # 計算
             if self.action == "入庫":
@@ -207,14 +211,12 @@ class BaseTransactionFrame(ttk.Frame):
                 after_qty = before_qty + actual_qty
                 action_db = "IN"
             else:
-
-                actual_qty = input_box_qty  # 出庫はそのまま（必要なら後で変更）
+                actual_qty = input_box_qty
                 after_qty = before_qty - actual_qty
                 if after_qty < 0:
                     raise ValueError("在庫不足です")
                 action_db = "OUT"
 
-            # 在庫更新
             cur.execute("""
                 UPDATE inventory
                 SET quantity = ?
