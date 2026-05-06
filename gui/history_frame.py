@@ -38,19 +38,26 @@ class HistoryFrame(ttk.Frame):
         ).pack(side="left", padx=5)
 
         # ▼ Treeview
-        columns = ("日時", "ホルマリン種", "区分", "数量", "担当者", "備考")
+        columns = ("日時", "ホルマリン種", "区分", "数量", "担当者", "在庫", "備考")
 
         self.tree = ttk.Treeview(self, columns=columns, show="headings")
-        self.tree.column("日時", width=160)
-        self.tree.column("ホルマリン種", width=160)
-        self.tree.column("区分", width=60)
-        self.tree.column("数量", width=50)
-        self.tree.column("担当者", width=120)
-        self.tree.column("備考", width=200)
+        self.tree.column("日時", width=160,anchor="center")
+        self.tree.column("ホルマリン種", width=160,anchor="center")
+        self.tree.column("区分", width=60,anchor="center")
+        self.tree.column("数量", width=50,anchor="e")
+        self.tree.column("担当者", width=120,anchor="center")
+        self.tree.column("在庫", width=50,anchor="e")
+        self.tree.column("備考", width=200,anchor="w")
         self.tree.pack(fill="both", expand=True, padx=10, pady=10)
 
+        self.sort_reverse = False  # 昇順/降順フラグ
+
         for col in columns:
-            self.tree.heading(col, text=col)
+            self.tree.heading(
+                col,
+                text=col,
+                command=lambda c=col: self.sort_by_column(c)
+            )
 
         # ▼ 戻るボタン
         ttk.Button(
@@ -59,9 +66,36 @@ class HistoryFrame(ttk.Frame):
             command=lambda: controller.show_frame("MenuFrame")
         ).pack(pady=10)
 
+    def sort_by_column(self, col):
+
+        col_index = self.tree["columns"].index(col)
+
+        data = []
+        for item in self.tree.get_children():
+            values = self.tree.item(item, "values")
+            data.append((values[col_index], item))
+
+        # ▼ ここを中に入れる！！
+        def convert(value, col):
+            if col == "日時":
+                # YYYY年M月D日 → ソート用数値
+                import re
+                nums = list(map(int, re.findall(r"\d+", value)))
+                return nums  # [2026, 5, 3]
+            try:
+                return float(value)
+            except:
+                return value
+
+        data.sort(key=lambda x: convert(x[0], col), reverse=self.sort_reverse)
+
+        for index, (_, item) in enumerate(data):
+            self.tree.move(item, "", index)
+
+        self.sort_reverse = not self.sort_reverse
+
     def refresh(self):
         data = self.get_history_data()
-
         action_map = {
             "IN": "入庫",
             "OUT": "出庫"
@@ -78,7 +112,14 @@ class HistoryFrame(ttk.Frame):
             row = list(row)
 
             # 区分変換
-            row[2] = action_map.get(row[2], row[2])
+            date_str = row[0][:10]
+            y, m, d = date_str.split("-")
+            row[0] = f"{int(y)}年{int(m)}月{int(d)}日"
+            row[2] = action_map.get(row[2], row[2])# 数量の小数点を消す
+            row[3] = int(row[3]) if row[3] is not None else 0
+            row[5] = int(row[5]) if row[5] is not None else 0
+            #row[7] = int(row[7]) if row[7] is not None else 0
+
             # ▼ フィルタ処理
             if selected != "すべて":
                 if row[1] != selected:

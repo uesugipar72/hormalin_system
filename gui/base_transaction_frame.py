@@ -171,16 +171,13 @@ class BaseTransactionFrame(ttk.Frame):
             chemical_data = self.chemical_dict[chemical_name]
             chemical_id = chemical_data["id"]
             quantity_per_unit = chemical_data["quantity_per_unit"]
-            
-            
-            # ← 箱数
+
             department_name = self.department_cb.get().strip()
 
             if department_name not in self.department_dict:
                 raise ValueError("部署が選択されていません")
 
             note = self.note_entry.get()
-            note = f"{input_box_qty}箱" if not note else f"{input_box_qty}箱 / {note}"
             staff_id = self.controller.current_user_id
             department_id = self.department_dict[department_name]
 
@@ -241,6 +238,8 @@ class BaseTransactionFrame(ttk.Frame):
 
             conn.commit()
             conn.close()
+            before_qty = int(before_qty)
+            after_qty = int(after_qty)
 
             messagebox.showinfo(
                 f"{self.action}登録完了",

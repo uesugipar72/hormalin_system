@@ -12,6 +12,7 @@ def get_history():
             t.action,
             t.quantity,
             u.user_name AS user_name,
+            t.after_quantity,
             t.note            
         FROM transaction_logs t
         LEFT JOIN chemicals c
