@@ -7,11 +7,10 @@ def monthly_usage():
     cur = conn.cursor()
 
     cur.execute("""
-
     SELECT
     c.name,
     SUM(t.quantity)
-
+                
     FROM transaction_logs t
     JOIN chemicals c
     ON t.chemical_id=c.id
