@@ -33,17 +33,17 @@ class MenuFrame(ttk.Frame):
             command=lambda: controller.show_frame("HistoryFrame")
         ).pack(pady=10)
 
-        ttk.Button(
-            self,
-            text="劇毒物管理簿",
-            command=lambda: controller.show_frame("PoisonLedgerFrame")
-        ).pack(pady=10)    
+        # ttk.Button(
+        #     self,
+        #     text="劇毒物管理簿",
+        #     command=lambda: controller.show_frame("PoisonLedgerFrame")
+        # ).pack(pady=10)    
 
-        ttk.Button(
-            self,
-            text="マスタ設定",
-            command=lambda: controller.show_frame("MasterFrame")
-        ).pack(pady=10)
+        # ttk.Button(
+        #     self,
+        #     text="マスタ設定",
+        #     command=lambda: controller.show_frame("MasterFrame")
+        # ).pack(pady=10)
 
       # ★ 終了ボタン追加
         ttk.Button(

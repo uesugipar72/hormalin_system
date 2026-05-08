@@ -2,4 +2,4 @@
 
 BASE_DIR = Path(__file__).parent
 
-DB_PATH = BASE_DIR / "database" / "hormalin.db"
+DB_PATH = Path(r"C:\DataBase\hormalin.db")
