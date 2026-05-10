@@ -6,6 +6,7 @@ from openpyxl import Workbook
 import os
 import win32com.client
 from openpyxl.styles import Font, Border, Side, Alignment
+from datetime import datetime
 
 class HistoryFrame(ttk.Frame):
 
@@ -33,6 +34,28 @@ class HistoryFrame(ttk.Frame):
         )
         self.filter_cb.set("すべて")
         self.filter_cb.pack(side="left", padx=5)
+
+        # ▼ 開始日
+        ttk.Label(filter_frame, text="開始日").pack(side="left", padx=(15, 5))
+
+        self.start_date_entry = ttk.Entry(
+            filter_frame,
+            width=12
+        )
+        self.start_date_entry.pack(side="left")
+
+        ttk.Label(filter_frame, text="YYYY-MM-DD").pack(side="left", padx=3)
+
+        # ▼ 終了日
+        ttk.Label(filter_frame, text="終了日").pack(side="left", padx=(15, 5))
+
+        self.end_date_entry = ttk.Entry(
+            filter_frame,
+            width=12
+        )
+        self.end_date_entry.pack(side="left")
+
+        ttk.Label(filter_frame, text="YYYY-MM-DD").pack(side="left", padx=3)
 
         # ▼ 抽出ボタン
         ttk.Button(
@@ -124,6 +147,26 @@ class HistoryFrame(ttk.Frame):
 
         selected = self.filter_cb.get()
 
+        start_date_str = self.start_date_entry.get().strip()
+        end_date_str = self.end_date_entry.get().strip()
+
+        start_date = None
+        end_date = None
+
+        try:
+            if start_date_str:
+                start_date = datetime.strptime(start_date_str, "%Y-%m-%d")
+
+            if end_date_str:
+                end_date = datetime.strptime(end_date_str, "%Y-%m-%d")
+
+        except ValueError:
+            messagebox.showerror(
+                "入力エラー",
+                "日付は YYYY-MM-DD 形式で入力してください"
+            )
+            return
+
         # ▼ 既存削除
         for row in self.tree.get_children():
             self.tree.delete(row)
@@ -145,6 +188,14 @@ class HistoryFrame(ttk.Frame):
             if selected != "すべて":
                 if row[1] != selected:
                     continue
+            # ▼ 日付フィルタ
+            row_date = datetime.strptime(date_str, "%Y-%m-%d")
+
+            if start_date and row_date < start_date:
+                continue
+
+            if end_date and row_date > end_date:
+                continue
 
             tag = "evenrow" if len(self.tree.get_children()) % 2 == 0 else "oddrow"
 
