@@ -6,8 +6,10 @@ from openpyxl import Workbook
 import os
 import win32com.client
 from openpyxl.styles import Font, Border, Side, Alignment
-from datetime import datetime
-
+import time
+import pythoncom
+import tempfile
+import uuid
 class HistoryFrame(ttk.Frame):
 
     def __init__(self, parent, controller):
@@ -17,7 +19,7 @@ class HistoryFrame(ttk.Frame):
 
         # ▼ 抽出コンボボックス
         filter_frame = ttk.Frame(self)
-        filter_frame.pack(pady=5)
+        filter_frame.pack(fill="x", padx=10, pady=5, anchor="w")
 
         ttk.Label(filter_frame, text="表示抽出").pack(side="left", padx=5)
 
@@ -64,6 +66,28 @@ class HistoryFrame(ttk.Frame):
             command=self.refresh
         ).pack(side="left", padx=5)
 
+        # ▼ 戻るボタン
+        ttk.Button(
+            filter_frame,
+            text="メニューに戻る",
+            command=lambda: controller.show_frame("MenuFrame")
+        ).pack(side="left",padx=10)
+
+        # ▼ Excel出力ボタン
+        ttk.Button(
+            filter_frame,
+            text="Excel出力",
+            command=self.export_excel
+        ).pack(side="left",padx=5)
+
+        ttk.Button(
+            filter_frame,
+            text="PDF出力",
+            command=self.export_pdf
+        ).pack(side="left",padx=5)
+
+        
+
         # ▼ Treeview
         columns = ("日時", "ホルマリン種", "区分", "数量", "担当者", "在庫", "備考")
 
@@ -90,25 +114,7 @@ class HistoryFrame(ttk.Frame):
                 text=col,
                 command=lambda c=col: self.sort_by_column(c)
             )
-        # ▼ Excel出力ボタン
-        ttk.Button(
-            self,
-            text="Excel出力",
-            command=self.export_excel
-        ).pack(pady=5)
-
-        ttk.Button(
-            self,
-            text="PDF出力",
-            command=self.export_pdf
-        ).pack(pady=5)
-
-        # ▼ 戻るボタン
-        ttk.Button(
-            self,
-            text="メニューに戻る",
-            command=lambda: controller.show_frame("MenuFrame")
-        ).pack(pady=10)
+        
 
     def sort_by_column(self, col):
 
@@ -211,30 +217,40 @@ class HistoryFrame(ttk.Frame):
 
     def export_excel(self):
 
-        file_path = filedialog.asksaveasfilename(
-        defaultextension=".xlsx",
-        filetypes=[("Excel files", "*.xlsx")],
-        title="保存先を選択"
+        documents = os.path.join(
+        os.path.expanduser("~"),
+        "Documents"
         )
 
-        if not file_path:
+        excel_path = filedialog.asksaveasfilename(
+            initialdir=documents,
+            defaultextension=".xlsx",
+            filetypes=[("Excel files", "*.xlsx")],
+            title="Excel    保存先を選択"
+        )
+        if not excel_path:
             return
 
         wb = self.create_workbook()
 
-        wb.save(file_path)
+        wb.save(excel_path)
 
         messagebox.showinfo(
             "完了",
             "Excelファイルを保存しました"
         )
 
-        os.startfile(file_path)
+        os.startfile(excel_path)
 
     # ▼ Excel → PDF変換
     def export_pdf(self):
+        documents = os.path.join(
+        os.path.expanduser("~"),
+        "Documents"
+        )
 
         pdf_path = filedialog.asksaveasfilename(
+            initialdir=documents,
             defaultextension=".pdf",
             filetypes=[("PDF files", "*.pdf")],
             title="PDF保存先を選択"
@@ -245,35 +261,69 @@ class HistoryFrame(ttk.Frame):
 
         excel_path = pdf_path.replace(".pdf", ".xlsx")
 
-        # ▼ 共通Workbook作成
-        wb = self.create_workbook()
+        excel = None
+        wb_excel = None
 
-        wb.save(excel_path)
+        try:
 
-        excel = win32com.client.Dispatch("Excel.Application")
-        excel.Visible = False
+            wb = self.create_workbook()
+            wb.save(excel_path)
 
-        wb_excel = excel.Workbooks.Open(
-            os.path.abspath(excel_path)
-        )
+            pythoncom.CoInitialize()
 
-        ws_excel = wb_excel.Worksheets(1)
+            excel = win32com.client.Dispatch("Excel.Application")
+            excel.Visible = False
+            excel.DisplayAlerts = False
 
-        ws_excel.ExportAsFixedFormat(
-            0,
-            os.path.abspath(pdf_path)
-        )
+            wb_excel = excel.Workbooks.Open(
+                os.path.abspath(excel_path)
+            )
 
-        wb_excel.Close(False)
-        excel.Quit()
+            ws_excel = wb_excel.Worksheets(1)
 
-        messagebox.showinfo(
-            "完了",
-            "PDFを出力しました"
-        )
+            ws_excel.ExportAsFixedFormat(
+                0,
+                os.path.abspath(pdf_path)
+            )
 
-        os.startfile(pdf_path)
+            time.sleep(1)
 
+            if os.path.exists(pdf_path):
+
+                messagebox.showinfo(
+                    "完了",
+                    "PDFを出力しました"
+                )
+
+                os.startfile(pdf_path)
+
+            else:
+
+                messagebox.showerror(
+                    "エラー",
+                    "PDFファイルが見つかりません"
+                )
+
+        except Exception as e:
+
+            messagebox.showerror(
+                "PDF出力エラー",
+                str(e)
+            )
+
+        finally:
+
+            if wb_excel:
+                wb_excel.Close(False)
+
+            if excel:
+                excel.Quit()
+
+            if os.path.exists(excel_path):
+                try:
+                    os.remove(excel_path)
+                except:
+                    pass
     def create_workbook(self):
 
         wb = Workbook()
@@ -347,6 +397,28 @@ class HistoryFrame(ttk.Frame):
                 )
 
                 cell.value = value
+
+                # ▼ 列ごとの配置
+                if col_index in [1, 2, 3, 5]:
+                    # 中央寄せ
+                    cell.alignment = Alignment(
+                        horizontal="center",
+                        vertical="center"
+                    )
+
+                elif col_index in [4, 6]:
+                    # 右寄せ
+                    cell.alignment = Alignment(
+                        horizontal="right",
+                        vertical="center"
+                    )
+
+                else:
+                    # 左寄せ
+                    cell.alignment = Alignment(
+                        horizontal="left",
+                        vertical="center"
+                    )
 
         # =====================================
         # 列幅
