@@ -10,8 +10,11 @@ import time
 import pythoncom
 import tempfile
 import uuid
-class HistoryFrame(ttk.Frame):
+from datetime import datetime
+from tkcalendar import DateEntry
 
+class HistoryFrame(ttk.Frame):
+   
     def __init__(self, parent, controller):
         super().__init__(parent)
 
@@ -37,27 +40,25 @@ class HistoryFrame(ttk.Frame):
         self.filter_cb.set("すべて")
         self.filter_cb.pack(side="left", padx=5)
 
-        # ▼ 開始日
+       # ▼ 開始日
         ttk.Label(filter_frame, text="開始日").pack(side="left", padx=(15, 5))
 
-        self.start_date_entry = ttk.Entry(
+        self.start_date_entry = DateEntry(
             filter_frame,
-            width=12
+            width=12,
+            date_pattern="yyyy-mm-dd"
         )
         self.start_date_entry.pack(side="left")
-
-        ttk.Label(filter_frame, text="YYYY-MM-DD").pack(side="left", padx=3)
 
         # ▼ 終了日
         ttk.Label(filter_frame, text="終了日").pack(side="left", padx=(15, 5))
 
-        self.end_date_entry = ttk.Entry(
+        self.end_date_entry = DateEntry(
             filter_frame,
-            width=12
+            width=12,
+            date_pattern="yyyy-mm-dd"
         )
         self.end_date_entry.pack(side="left")
-
-        ttk.Label(filter_frame, text="YYYY-MM-DD").pack(side="left", padx=3)
 
         # ▼ 抽出ボタン
         ttk.Button(
