@@ -1,7 +1,8 @@
 from tkinter import ttk
 from tkinter import messagebox
 import sqlite3
-
+from datetime import datetime
+from zoneinfo import ZoneInfo
 from utils.db_utils import get_connection
 from controllers.inventory_controller import InventoryController
 
@@ -178,6 +179,9 @@ class BaseTransactionFrame(ttk.Frame):
                 raise ValueError("部署が選択されていません")
 
             note = self.note_entry.get()
+            created_at = datetime.now(
+                ZoneInfo("Asia/Tokyo")
+            ).strftime("%Y-%m-%d %H:%M:%S")
             staff_id = self.controller.current_user_id
             department_id = self.department_dict[department_name]
 
@@ -223,8 +227,18 @@ class BaseTransactionFrame(ttk.Frame):
             # ログ登録
             cur.execute("""
                 INSERT INTO transaction_logs
-                (chemical_id, action, quantity, before_quantity, after_quantity, department_id, staff_id, note)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                (
+                    chemical_id,
+                    action,
+                    quantity,
+                    before_quantity,
+                    after_quantity,
+                    department_id,
+                    staff_id,
+                    note,
+                    created_at
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?,?)
             """, (
                 chemical_id,
                 action_db,
@@ -233,7 +247,8 @@ class BaseTransactionFrame(ttk.Frame):
                 after_qty,
                 department_id,
                 staff_id,
-                note
+                note,
+                created_at
             ))
 
             conn.commit()

@@ -12,8 +12,12 @@ import tempfile
 import uuid
 from datetime import datetime
 from tkcalendar import DateEntry
+from datetime import datetime, timedelta
 
 class HistoryFrame(ttk.Frame):
+
+    window_size = "1200x800"
+    resizable = (True,True)
    
     def __init__(self, parent, controller):
         super().__init__(parent)
@@ -49,6 +53,9 @@ class HistoryFrame(ttk.Frame):
             date_pattern="yyyy-mm-dd"
         )
         self.start_date_entry.pack(side="left")
+        three_months_ago = datetime.now() - timedelta(days=90)
+        self.start_date_entry.set_date(three_months_ago)
+
 
         # ▼ 終了日
         ttk.Label(filter_frame, text="終了日").pack(side="left", padx=(15, 5))
@@ -61,10 +68,15 @@ class HistoryFrame(ttk.Frame):
         self.end_date_entry.pack(side="left")
 
         # ▼ 抽出ボタン
-        ttk.Button(
+        tk.Button(
             filter_frame,
             text="抽出",
-            command=self.refresh
+            command=self.refresh,
+            bg="#0078D7",
+            fg="white",
+            activebackground="#1E90FF",
+            activeforeground="white",
+            font=("Meiryo", 10, "bold")
         ).pack(side="left", padx=5)
 
         # ▼ 戻るボタン
