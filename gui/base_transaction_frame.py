@@ -5,15 +5,17 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 from utils.db_utils import get_connection
 from controllers.inventory_controller import InventoryController
+from gui.base_frame import BaseFrame
 
 
-class BaseTransactionFrame(ttk.Frame):
+
+class BaseTransactionFrame(BaseFrame):
 
     action = None   # 入庫 / 出庫
 
     def __init__(self, parent, controller):
 
-        super().__init__(parent)
+        super().__init__(parent,controller)
 
         self.controller = controller
 

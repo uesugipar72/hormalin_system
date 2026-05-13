@@ -16,6 +16,10 @@ class App(tk.Tk):
         super().__init__()
         self.inventory_controller = InventoryController()
 
+         # ログインユーザー情報
+        self.current_user_id = None
+        self.current_user_name = ""
+
         self.title("ホルマリン管理システム")
         self.geometry("")  # 自動サイズ
         
@@ -68,6 +72,9 @@ class App(tk.Tk):
 
         if hasattr(frame, "refresh"):
             frame.refresh()
+
+        if hasattr(frame, "refresh_user_display"):
+            frame.refresh_user_display()
 
         
 

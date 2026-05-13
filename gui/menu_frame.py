@@ -1,11 +1,11 @@
 from tkinter import ttk
+from gui.base_frame import BaseFrame
 
-
-class MenuFrame(ttk.Frame):
+class MenuFrame(BaseFrame):
 
     def __init__(self, parent, controller):
 
-        super().__init__(parent)
+        super().__init__(parent,controller)
 
         ttk.Label(self,text="メニュー",font=("Meiryo",18)).pack(pady=30)
 

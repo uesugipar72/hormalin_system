@@ -13,14 +13,15 @@ import uuid
 from datetime import datetime
 from tkcalendar import DateEntry
 from datetime import datetime, timedelta
+from gui.base_frame import BaseFrame
 
-class HistoryFrame(ttk.Frame):
+class HistoryFrame(BaseFrame):
 
     window_size = "1200x800"
     resizable = (True,True)
    
     def __init__(self, parent, controller):
-        super().__init__(parent)
+        super().__init__(parent,controller)
 
         ttk.Label(self, text="取引履歴画面").pack(pady=10)
 

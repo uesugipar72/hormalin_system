@@ -1,21 +1,15 @@
 from tkinter import ttk
+from gui.base_frame import BaseFrame
 
-
-class InventoryFrame(ttk.Frame):
+class InventoryFrame(BaseFrame):
 
     window_size = "300x500"
 
     def __init__(self, parent, controller):
 
-        super().__init__(parent)
+        super().__init__(parent,controller)
 
         self.controller = controller
-
-        self.user_label = ttk.Label(
-            self,
-            font=("Meiryo", 11)
-        )
-        self.user_label.pack(pady=20)
 
         ttk.Label(
             self,
@@ -80,10 +74,5 @@ class InventoryFrame(ttk.Frame):
 
     def refresh(self):
 
-        user = self.controller.current_user
-
-        if user:
-            self.user_label.config(
-                text=f"{user['name']} さんログイン中"
-            )
+       
         self.load_inventory()
