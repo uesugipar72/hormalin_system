@@ -45,12 +45,30 @@ class MenuFrame(BaseFrame):
         #     command=lambda: controller.show_frame("MasterFrame")
         # ).pack(pady=10)
 
+   # ログアウトボタン
+        ttk.Button(
+            self,
+            text="ログアウト",
+            command=self.logout
+        ).pack(pady=20)
+
       # ★ 終了ボタン追加
         ttk.Button(
             self,
             text="終了",
             command=self.quit_app
         ).pack(pady=30)
+
+    def logout(self):
+        # LoginFrame取得
+        login_frame = self.controller.frames["LoginFrame"]
+
+        # ID/PASSWORDクリア
+        login_frame.clear_entries()
+
+        # ログイン画面表示
+        self.controller.show_frame("LoginFrame")
+
 
     def quit_app(self):
         self.master.destroy()

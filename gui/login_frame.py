@@ -50,6 +50,7 @@ class LoginFrame(ttk.Frame):
 
         self.user_entry.focus()
 
+    
     def focus_password(self, event):
 
         self.pass_entry.focus()
@@ -76,3 +77,8 @@ class LoginFrame(ttk.Frame):
         else:
 
             messagebox.showerror("エラー", "ログイン失敗")
+
+    # 入力クリア用メソッド
+    def clear_entries(self):
+        self.user_entry.delete(0, "end")
+        self.pass_entry.delete(0, "end")

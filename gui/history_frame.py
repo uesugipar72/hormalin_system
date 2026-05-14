@@ -10,8 +10,7 @@ import time
 import pythoncom
 import tempfile
 import uuid
-from datetime import datetime
-from tkcalendar import DateEntry
+from tkcalendar import Calendar
 from datetime import datetime, timedelta
 from gui.base_frame import BaseFrame
 
@@ -21,6 +20,7 @@ class HistoryFrame(BaseFrame):
     resizable = (True,True)
    
     def __init__(self, parent, controller):
+
         super().__init__(parent,controller)
 
         ttk.Label(self, text="取引履歴画面").pack(pady=10)
@@ -45,28 +45,61 @@ class HistoryFrame(BaseFrame):
         self.filter_cb.set("すべて")
         self.filter_cb.pack(side="left", padx=5)
 
-       # ▼ 開始日
+
+        ttk.Label(filter_frame, text="開始日").pack(side="left", padx=(15, 5))
+        today = datetime.now()
+        three_months_ago = today - timedelta(days=90)
+
         ttk.Label(filter_frame, text="開始日").pack(side="left", padx=(15, 5))
 
-        self.start_date_entry = DateEntry(
+        # =====================================
+        # 開始日
+        # =====================================
+
+        ttk.Label(filter_frame, text="開始日").pack(side="left", padx=(15, 5))
+
+        self.start_date_var = tk.StringVar()
+        self.start_date_var.set(three_months_ago.strftime("%Y-%m-%d"))
+
+        self.start_date_entry = ttk.Entry(
             filter_frame,
-            width=12,
-            date_pattern="yyyy-mm-dd"
+            textvariable=self.start_date_var,
+            width=12
         )
         self.start_date_entry.pack(side="left")
-        three_months_ago = datetime.now() - timedelta(days=90)
-        self.start_date_entry.set_date(three_months_ago)
+
+        ttk.Button(
+            filter_frame,
+            text="📅",
+            width=3,
+            command=lambda: self.open_calendar(self.start_date_var)
+        ).pack(side="left", padx=(2, 10))
 
 
-        # ▼ 終了日
+        # =====================================
+        # 終了日
+        # =====================================
+
         ttk.Label(filter_frame, text="終了日").pack(side="left", padx=(15, 5))
 
-        self.end_date_entry = DateEntry(
+        self.end_date_var = tk.StringVar()
+        self.end_date_var.set(today.strftime("%Y-%m-%d"))
+
+        self.end_date_entry = ttk.Entry(
             filter_frame,
-            width=12,
-            date_pattern="yyyy-mm-dd"
+            textvariable=self.end_date_var,
+            width=12
         )
         self.end_date_entry.pack(side="left")
+
+        ttk.Button(
+            filter_frame,
+            text="📅",
+            width=3,
+            command=lambda: self.open_calendar(self.end_date_var)
+        ).pack(side="left", padx=(2, 10))
+
+       
 
         # ▼ 抽出ボタン
         tk.Button(
@@ -128,7 +161,50 @@ class HistoryFrame(BaseFrame):
                 text=col,
                 command=lambda c=col: self.sort_by_column(c)
             )
-        
+
+    def open_calendar(self, target_var):
+
+        top = tk.Toplevel(self)
+
+        top.title("日付選択")
+        top.geometry("300x250")
+
+        top.transient(self)
+        top.grab_set()
+        top.resizable(False, False)
+
+        cal = Calendar(
+            top,
+            selectmode="day",
+            date_pattern="yyyy-mm-dd"
+        )
+
+        cal.pack(fill="both", expand=True, padx=10, pady=10)
+
+        # ▼ 現在値があれば反映
+        try:
+            current_date = datetime.strptime(
+                target_var.get(),
+                "%Y-%m-%d"
+            )
+
+            cal.selection_set(current_date)
+
+        except:
+            pass
+
+        # ▼ 決定処理
+        def select_date():
+
+            target_var.set(cal.get_date())
+
+            top.destroy()
+
+        ttk.Button(
+            top,
+            text="決定",
+            command=select_date
+        ).pack(pady=5)   
 
     def sort_by_column(self, col):
 
@@ -167,8 +243,8 @@ class HistoryFrame(BaseFrame):
 
         selected = self.filter_cb.get()
 
-        start_date_str = self.start_date_entry.get().strip()
-        end_date_str = self.end_date_entry.get().strip()
+        start_date_str = self.start_date_var.get().strip()
+        end_date_str = self.end_date_var.get().strip()
 
         start_date = None
         end_date = None
@@ -192,7 +268,10 @@ class HistoryFrame(BaseFrame):
             self.tree.delete(row)
 
         # ▼ 再表示（フィルタ付き）
-        for row in data:
+        for row in sorted(
+            data,
+            key=lambda x: datetime.strptime(x[0][:10], "%Y-%m-%d")
+        ):
             row = list(row)
 
             # 区分変換
