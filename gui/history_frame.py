@@ -218,12 +218,15 @@ class HistoryFrame(BaseFrame):
         # ▼ ここを中に入れる！！
         def convert(value, col):
             if col == "日時":
-                # YYYY年M月D日 → ソート用数値
-                import re
-                nums = list(map(int, re.findall(r"\d+", value)))
-                return nums  # [2026, 5, 3]
+
+                return datetime.strptime(
+                    value,
+                    "%Y年%m月%d日 %H:%M"
+                )
+
             try:
                 return float(value)
+
             except:
                 return value
 
@@ -270,14 +273,15 @@ class HistoryFrame(BaseFrame):
         # ▼ 再表示（フィルタ付き）
         for row in sorted(
             data,
-            key=lambda x: datetime.strptime(x[0][:10], "%Y-%m-%d")
+            key=lambda x: datetime.strptime(x[0], "%Y-%m-%d %H:%M:%S")
         ):
             row = list(row)
 
             # 区分変換
+            dt = datetime.strptime(row[0], "%Y-%m-%d %H:%M:%S")
             date_str = row[0][:10]
             y, m, d = date_str.split("-")
-            row[0] = f"{int(y)}年{int(m)}月{int(d)}日"
+            row[0] = dt.strftime("%Y年%m月%d")
             row[2] = action_map.get(row[2], row[2])# 数量の小数点を消す
             row[3] = int(row[3]) if row[3] is not None else 0
             row[5] = int(row[5]) if row[5] is not None else 0
@@ -430,7 +434,7 @@ class HistoryFrame(BaseFrame):
         ws.merge_cells("A1:G1")
 
         title_cell = ws["A1"]
-        title_cell.value = "ホルマリン取引履歴"
+        title_cell.value = "ホルマリン管理台帳"
 
         title_cell.font = Font(
             bold=True,
