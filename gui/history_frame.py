@@ -136,7 +136,7 @@ class HistoryFrame(BaseFrame):
         
 
         # ▼ Treeview
-        columns = ("日時", "ホルマリン種", "区分", "数量", "担当者", "在庫", "備考")
+        columns = ("日時", "ソート日時","ホルマリン種", "区分", "数量", "担当者", "在庫", "備考")
 
         self.tree = ttk.Treeview(self, columns=columns, show="headings")
 
@@ -145,6 +145,7 @@ class HistoryFrame(BaseFrame):
         self.tree.tag_configure("oddrow", background="white")
 
         self.tree.column("日時", width=160,anchor="center")
+        self.tree.column("ソート日時", width=0,stretch=False)
         self.tree.column("ホルマリン種", width=160,anchor="center")
         self.tree.column("区分", width=60,anchor="center")
         self.tree.column("数量", width=50,anchor="e")
@@ -213,26 +214,29 @@ class HistoryFrame(BaseFrame):
         data = []
         for item in self.tree.get_children():
             values = self.tree.item(item, "values")
-            data.append((values[col_index], item))
+            data.append((values[col_index], item, values))
 
         # ▼ ここを中に入れる！！
-        def convert(value, col):
-            if col == "日時":
+        def convert(value, col, values):
+              if col == "日時":
 
-                return datetime.strptime(
-                    value,
-                    "%Y年%m月%d日 %H:%M"
-                )
+                    return datetime.strptime(
+                        values[1],   # hidden ソート日時
+                        "%Y-%m-%d %H:%M:%S"
+                    )
 
-            try:
-                return float(value)
+              try:
+                    return float(value)
 
-            except:
-                return value
+              except:
+                    return value
 
-        data.sort(key=lambda x: convert(x[0], col), reverse=self.sort_reverse)
+        data.sort(
+            key=lambda x: convert(x[0], col, x[2]),
+            reverse=self.sort_reverse
+        )
 
-        for index, (_, item) in enumerate(data):
+        for index, (_, item, _) in enumerate(data):
             self.tree.move(item, "", index)
 
         self.sort_reverse = not self.sort_reverse
@@ -279,9 +283,11 @@ class HistoryFrame(BaseFrame):
 
             # 区分変換
             dt = datetime.strptime(row[0], "%Y-%m-%d %H:%M:%S")
+            original_datetime = row[0]
             date_str = row[0][:10]
             y, m, d = date_str.split("-")
-            row[0] = dt.strftime("%Y年%m月%d")
+            row[0] = dt.strftime("%Y年%m月%d日")
+
             row[2] = action_map.get(row[2], row[2])# 数量の小数点を消す
             row[3] = int(row[3]) if row[3] is not None else 0
             row[5] = int(row[5]) if row[5] is not None else 0
@@ -305,7 +311,17 @@ class HistoryFrame(BaseFrame):
             self.tree.insert(
                 "",
                 "end",
-                values=row,
+                iid=str(uuid.uuid4()),
+                values=(
+                    row[0],              # 表示用
+                    original_datetime,   # ソート用
+                    row[1],
+                    row[2],
+                    row[3],
+                    row[4],
+                    row[5],
+                    row[6]
+                ),
                 tags=(tag,)
             )
 
