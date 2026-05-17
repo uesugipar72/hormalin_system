@@ -133,6 +133,12 @@ class HistoryFrame(BaseFrame):
             command=self.export_pdf
         ).pack(side="left",padx=5)
 
+        ttk.Button(
+            filter_frame,
+            text="最終履歴削除",
+            command=self.delete_last_transaction
+        ).pack(side="left", padx=5)
+
         
 
         # ▼ Treeview
@@ -323,6 +329,42 @@ class HistoryFrame(BaseFrame):
                     row[6]
                 ),
                 tags=(tag,)
+            )
+
+    def delete_last_transaction(self):
+
+        result = messagebox.askyesno(
+            "確認",
+            "最新の取引履歴を削除しますか？\n在庫も修正されます。"
+        )
+
+        if not result:
+            return
+
+        try:
+
+            from services.transaction_service import delete_last_transaction
+
+            deleted = delete_last_transaction()
+
+            if deleted:
+                messagebox.showinfo(
+                    "完了",
+                    "最新履歴を削除しました"
+                )
+                self.refresh()
+
+            else:
+                messagebox.showwarning(
+                    "対象なし",
+                    "削除できる履歴がありません"
+                )
+
+        except Exception as e:
+
+            messagebox.showerror(
+                "削除エラー",
+                str(e)
             )
 
     def get_history_data(self):
