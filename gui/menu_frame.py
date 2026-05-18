@@ -71,4 +71,4 @@ class MenuFrame(BaseFrame):
 
 
     def quit_app(self):
-        self.master.destroy()
+        self.controller.destroy()
