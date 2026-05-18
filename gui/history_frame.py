@@ -142,7 +142,7 @@ class HistoryFrame(BaseFrame):
         
 
         # ▼ Treeview
-        columns = ("日時", "ソート日時","ホルマリン種", "区分", "数量", "担当者", "在庫", "備考")
+        columns = ("日時", "ソート日時","部門","ホルマリン種", "区分", "数量", "担当者", "在庫", "備考")
 
         self.tree = ttk.Treeview(self, columns=columns, show="headings")
 
@@ -152,6 +152,7 @@ class HistoryFrame(BaseFrame):
 
         self.tree.column("日時", width=160,anchor="center")
         self.tree.column("ソート日時", width=0,stretch=False)
+        self.tree.column("部門", width=100,anchor="center")
         self.tree.column("ホルマリン種", width=160,anchor="center")
         self.tree.column("区分", width=60,anchor="center")
         self.tree.column("数量", width=50,anchor="e")
@@ -294,14 +295,14 @@ class HistoryFrame(BaseFrame):
             y, m, d = date_str.split("-")
             row[0] = dt.strftime("%Y年%m月%d日")
 
-            row[2] = action_map.get(row[2], row[2])# 数量の小数点を消す
-            row[3] = int(row[3]) if row[3] is not None else 0
-            row[5] = int(row[5]) if row[5] is not None else 0
+            row[3] = action_map.get(row[3], row[3])# 数量の小数点を消す
+            row[4] = int(row[4]) if row[4] is not None else 0
+            row[6] = int(row[6]) if row[6] is not None else 0
             #row[7] = int(row[7]) if row[7] is not None else 0
 
             # ▼ フィルタ処理
             if selected != "すべて":
-                if row[1] != selected:
+                if row[2] != selected:
                     continue
             # ▼ 日付フィルタ
             row_date = datetime.strptime(date_str, "%Y-%m-%d")
@@ -319,14 +320,15 @@ class HistoryFrame(BaseFrame):
                 "end",
                 iid=str(uuid.uuid4()),
                 values=(
-                    row[0],              # 表示用
-                    original_datetime,   # ソート用
-                    row[1],
-                    row[2],
-                    row[3],
-                    row[4],
-                    row[5],
-                    row[6]
+                    row[0],              # 表示日時
+                    original_datetime,   # ソート日時(hidden)
+                    row[1],              # 部門
+                    row[2],              # ホルマリン種
+                    row[3],              # 区分
+                    row[4],              # 数量
+                    row[5],              # 担当者
+                    row[6],              # 在庫
+                    row[7]               # 備考
                 ),
                 tags=(tag,)
             )
@@ -510,6 +512,7 @@ class HistoryFrame(BaseFrame):
 
         headers = (
             "日時",
+            "部門",
             "ホルマリン種",
             "区分",
             "数量",
@@ -580,14 +583,15 @@ class HistoryFrame(BaseFrame):
         # =====================================
 
         widths = {
-            "A": 18,
-            "B": 20,
-            "C": 10,
-            "D": 10,
-            "E": 15,
-            "F": 10,
-            "G": 40
-        }
+            "A":18,
+            "B":15,   # 部門
+            "C":20,
+            "D":10,
+            "E":10,
+            "F":15,
+            "G":10,
+            "H":40
+                }
 
         for col, width in widths.items():
             ws.column_dimensions[col].width = width
