@@ -295,15 +295,9 @@ class HistoryFrame(BaseFrame):
             y, m, d = date_str.split("-")
             row[0] = dt.strftime("%Y年%m月%d日")
 
-<<<<<<< HEAD
-            row[2] = action_map.get(row[2], row[2])
-            row[3] = int(row[3]) if row[3] is not None else 0
-            row[5] = int(row[5]) if row[5] is not None else 0
-=======
             row[3] = action_map.get(row[3], row[3])# 数量の小数点を消す
             row[4] = int(row[4]) if row[4] is not None else 0
             row[6] = int(row[6]) if row[6] is not None else 0
->>>>>>> dafd6dd742803fe22a3c6268c6ad29b735a0fad0
             #row[7] = int(row[7]) if row[7] is not None else 0
 
             # ▼ フィルタ処理
@@ -338,7 +332,27 @@ class HistoryFrame(BaseFrame):
                 ),
                 tags=(tag,)
             )
+    def reset_filters(self):
 
+        # 今日・3か月前を再計算
+        today = datetime.now()
+        three_months_ago = today - timedelta(days=90)
+
+        # 試薬フィルタ
+        self.filter_cb.set("すべて")
+
+        # 開始日
+        self.start_date_var.set(
+            three_months_ago.strftime("%Y-%m-%d")
+        )
+
+        # 終了日
+        self.end_date_var.set(
+            today.strftime("%Y-%m-%d")
+        )
+
+        # 履歴再読込（全件表示）
+        self.refresh()
     def delete_last_transaction(self):
 
         result = messagebox.askyesno(

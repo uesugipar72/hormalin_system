@@ -76,6 +76,10 @@ class App(tk.Tk):
         if hasattr(frame, "refresh_user_display"):
             frame.refresh_user_display()
 
+        # 履歴画面などに reset_filters があれば実行
+        if hasattr(frame, "reset_filters"):
+            frame.reset_filters()
+
         
 
         

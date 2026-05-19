@@ -12,16 +12,17 @@ def get_history():
             c.name,              -- 試薬名(ホルマリン種)
             t.action,
             t.quantity,
-            t.user_name,
-            t.stock_after,
-            t.remark
+            u.user_name,
+            t.after_quantity,
+            t.note
         FROM transaction_logs t
 
         LEFT JOIN departments d
-            ON t.department = d.department_id
-
+            ON t.department_id = d.id
         LEFT JOIN chemicals c
-            ON t.chemical_id = c.chemical_id
+            ON t.chemical_id = c.id
+        LEFT JOIN users u
+            ON t.staff_id = u.user_id        
 
         ORDER BY t.created_at DESC
     """)
