@@ -288,7 +288,7 @@ class HistoryFrame(BaseFrame):
             y, m, d = date_str.split("-")
             row[0] = dt.strftime("%Y年%m月%d日")
 
-            row[2] = action_map.get(row[2], row[2])# 数量の小数点を消す
+            row[2] = action_map.get(row[2], row[2])
             row[3] = int(row[3]) if row[3] is not None else 0
             row[5] = int(row[5]) if row[5] is not None else 0
             #row[7] = int(row[7]) if row[7] is not None else 0
