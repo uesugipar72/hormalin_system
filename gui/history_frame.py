@@ -29,28 +29,7 @@ class HistoryFrame(BaseFrame):
         filter_frame = ttk.Frame(self)
         filter_frame.pack(fill="x", padx=10, pady=5, anchor="w")
 
-        ttk.Label(filter_frame, text="表示抽出").pack(side="left", padx=5)
-
-        self.filter_cb = ttk.Combobox(
-            filter_frame,
-            values=[
-                "すべて",
-                "8mLホルマリン",
-                "100mLホルマリン",
-                "150mLホルマリン"
-            ],
-            state="readonly",
-            width=20
-        )
-        self.filter_cb.set("すべて")
-        self.filter_cb.pack(side="left", padx=5)
-
-
-        ttk.Label(filter_frame, text="開始日").pack(side="left", padx=(15, 5))
-        today = datetime.now()
-        three_months_ago = today - timedelta(days=90)
-
-        ttk.Label(filter_frame, text="開始日").pack(side="left", padx=(15, 5))
+        today, one_month_ago = self.get_default_dates()
 
         # =====================================
         # 開始日
@@ -59,7 +38,7 @@ class HistoryFrame(BaseFrame):
         ttk.Label(filter_frame, text="開始日").pack(side="left", padx=(15, 5))
 
         self.start_date_var = tk.StringVar()
-        self.start_date_var.set(three_months_ago.strftime("%Y-%m-%d"))
+        self.start_date_var.set(one_month_ago.strftime("%Y-%m-%d"))
 
         self.start_date_entry = ttk.Entry(
             filter_frame,
@@ -99,6 +78,47 @@ class HistoryFrame(BaseFrame):
             command=lambda: self.open_calendar(self.end_date_var)
         ).pack(side="left", padx=(2, 10))
 
+        #=====================================
+        # 部門選択
+        # =====================================
+
+        ttk.Label(filter_frame, text="部門").pack(side="left", padx=5)
+
+        self.department_cb = ttk.Combobox(
+            filter_frame,
+            values=[
+                "すべて",
+                "内視鏡",
+                "手術室",
+                "生理",
+                "病理",
+                "外来",
+                "検査室"
+            ],
+            state="readonly",
+            width=15
+        )
+        self.department_cb.set("すべて")
+        self.department_cb.pack(side="left", padx=5)
+
+
+        #ホルマリン種別選択
+        ttk.Label(filter_frame, text="薬品種別").pack(side="left", padx=5)
+
+        self.filter_cb = ttk.Combobox(
+            filter_frame,
+            values=[
+                "すべて",
+                "8mLホルマリン",
+                "100mLホルマリン",
+                "150mLホルマリン"
+            ],
+            state="readonly",
+            width=20
+        )
+        self.filter_cb.set("すべて")
+        self.filter_cb.pack(side="left", padx=5)
+
        
 
         # ▼ 抽出ボタン
@@ -133,11 +153,11 @@ class HistoryFrame(BaseFrame):
             command=self.export_pdf
         ).pack(side="left",padx=5)
 
-        ttk.Button(
-            filter_frame,
-            text="最終履歴削除",
-            command=self.delete_last_transaction
-        ).pack(side="left", padx=5)
+        # ttk.Button(
+        #     filter_frame,
+        #     text="最終履歴削除",
+        #     command=self.delete_last_transaction
+        # ).pack(side="left", padx=5)
 
         
 
@@ -169,6 +189,13 @@ class HistoryFrame(BaseFrame):
                 text=col,
                 command=lambda c=col: self.sort_by_column(c)
             )
+
+    def get_default_dates(self):
+
+        today = datetime.now()
+        one_month_ago = today - timedelta(days=30)
+
+        return today, one_month_ago
 
     def open_calendar(self, target_var):
 
@@ -259,6 +286,7 @@ class HistoryFrame(BaseFrame):
 
         start_date_str = self.start_date_var.get().strip()
         end_date_str = self.end_date_var.get().strip()
+        selected_department = self.department_cb.get()
 
         start_date = None
         end_date = None
@@ -301,9 +329,16 @@ class HistoryFrame(BaseFrame):
             #row[7] = int(row[7]) if row[7] is not None else 0
 
             # ▼ フィルタ処理
+            # ▼ 部門フィルタ
+            if selected_department != "すべて":
+                if row[1] != selected_department:
+                    continue
+
+            # ▼ 薬品フィルタ
             if selected != "すべて":
                 if row[2] != selected:
                     continue
+
             # ▼ 日付フィルタ
             row_date = datetime.strptime(date_str, "%Y-%m-%d")
 
@@ -334,16 +369,15 @@ class HistoryFrame(BaseFrame):
             )
     def reset_filters(self):
 
-        # 今日・3か月前を再計算
-        today = datetime.now()
-        three_months_ago = today - timedelta(days=90)
+        # 今日・1か月前を再計算
+        today, one_month_ago = self.get_default_dates()
 
         # 試薬フィルタ
         self.filter_cb.set("すべて")
 
         # 開始日
         self.start_date_var.set(
-            three_months_ago.strftime("%Y-%m-%d")
+            one_month_ago.strftime("%Y-%m-%d")
         )
 
         # 終了日
@@ -565,7 +599,9 @@ class HistoryFrame(BaseFrame):
             start=start_row
         ):
 
-            values = self.tree.item(item, "values")
+            values = list(self.tree.item(item, "values"))
+            # hidden ソート日時を除外
+            values.pop(1)
 
             for col_index, value in enumerate(values, start=1):
 
