@@ -1,3 +1,4 @@
+import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 import sqlite3
@@ -70,8 +71,8 @@ class BaseTransactionFrame(BaseFrame):
 
         ttk.Button(
             btn_frame,
-            text="メニューに戻る",
-            command=lambda: controller.show_frame("MenuFrame")
+            text="キャンセル",
+            command=self.cancel
         ).grid(row=0, column=1, padx=10)
 
         # 初期ロード
@@ -253,20 +254,79 @@ class BaseTransactionFrame(BaseFrame):
                 created_at
             ))
 
+            log_id = cur.lastrowid
+
             conn.commit()
             conn.close()
             before_qty = int(before_qty)
             after_qty = int(after_qty)
 
-            messagebox.showinfo(
-                f"{self.action}登録完了",
-                f"薬品：{chemical_name}\n在庫：{before_qty} → {after_qty}"
+            self.show_complete_dialog(
+                chemical_id, chemical_name, before_qty, after_qty, log_id
             )
 
             self.reset_form()
 
         except Exception as e:
             messagebox.showerror("エラー", str(e))
+
+    def show_complete_dialog(self, chemical_id, chemical_name, before_qty, after_qty, log_id):
+
+        dialog = tk.Toplevel(self)
+        dialog.title(f"{self.action}登録完了")
+        dialog.resizable(False, False)
+        dialog.transient(self.winfo_toplevel())
+        dialog.grab_set()
+
+        ttk.Label(
+            dialog,
+            text=f"薬品：{chemical_name}\n在庫：{before_qty} → {after_qty}",
+            padding=20
+        ).pack()
+
+        btn_frame = ttk.Frame(dialog)
+        btn_frame.pack(pady=10)
+
+        ttk.Button(
+            btn_frame,
+            text="閉じる",
+            command=dialog.destroy
+        ).grid(row=0, column=0, padx=10)
+
+        ttk.Button(
+            btn_frame,
+            text="キャンセル",
+            command=lambda: self.cancel_registration(chemical_id, log_id, dialog)
+        ).grid(row=0, column=1, padx=10)
+
+        dialog.wait_window()
+
+    def cancel_registration(self, chemical_id, log_id, dialog):
+
+        try:
+            conn = get_connection()
+            cur = conn.cursor()
+
+            cur.execute("""
+                UPDATE inventory
+                SET quantity = (
+                    SELECT before_quantity FROM transaction_logs WHERE id = ?
+                )
+                WHERE chemical_id = ?
+            """, (log_id, chemical_id))
+
+            cur.execute("""
+                DELETE FROM transaction_logs WHERE id = ?
+            """, (log_id,))
+
+            conn.commit()
+            conn.close()
+
+        except Exception as e:
+            messagebox.showerror("エラー", str(e))
+
+        finally:
+            dialog.destroy()
 
     def reset_form(self):
         # コンボボックス
@@ -284,3 +344,7 @@ class BaseTransactionFrame(BaseFrame):
 
     def go_menu(self):
         self.controller.show_frame("MenuFrame")
+
+    def cancel(self):
+        self.reset_form()
+        self.go_menu()
