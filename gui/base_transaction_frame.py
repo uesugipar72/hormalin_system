@@ -5,6 +5,7 @@ import sqlite3
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from utils.db_utils import get_connection
+from utils.window_utils import center_window
 from controllers.inventory_controller import InventoryController
 from gui.base_frame import BaseFrame
 
@@ -289,7 +290,7 @@ class BaseTransactionFrame(BaseFrame):
 
         ttk.Button(
             btn_frame,
-            text="閉じる",
+            text="OK",
             command=dialog.destroy
         ).grid(row=0, column=0, padx=10)
 
@@ -299,6 +300,7 @@ class BaseTransactionFrame(BaseFrame):
             command=lambda: self.cancel_registration(chemical_id, log_id, dialog)
         ).grid(row=0, column=1, padx=10)
 
+        center_window(dialog)
         dialog.wait_window()
 
     def cancel_registration(self, chemical_id, log_id, dialog):

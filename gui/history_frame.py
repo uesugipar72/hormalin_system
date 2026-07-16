@@ -13,6 +13,7 @@ import uuid
 from tkcalendar import Calendar
 from datetime import datetime, timedelta
 from gui.base_frame import BaseFrame
+from utils.window_utils import center_window
 
 class HistoryFrame(BaseFrame):
 
@@ -207,6 +208,7 @@ class HistoryFrame(BaseFrame):
         top.transient(self)
         top.grab_set()
         top.resizable(False, False)
+        center_window(top)
 
         cal = Calendar(
             top,

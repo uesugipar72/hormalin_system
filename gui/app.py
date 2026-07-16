@@ -10,6 +10,7 @@ from gui.inventory_frame import InventoryFrame
 from gui.master_frame import MasterFrame
 from gui.poison_ledger_frame import PoisonLedgerFrame
 from controllers.inventory_controller import InventoryController
+from utils.window_utils import center_window
 
 class App(tk.Tk):
     def __init__(self):
@@ -65,6 +66,7 @@ class App(tk.Tk):
         self.resizable(*resizable)
 
         self.update_idletasks()
+        center_window(self)
 
 
         if hasattr(frame, "reset_form"):
