@@ -149,7 +149,7 @@ class BaseTransactionFrame(BaseFrame):
 
     def set_quantity_options(self):
 
-        if self.action == "出庫":
+        if self.action in ("出庫", "返却"):
             values = list(range(1, 41))
         else:
             values = list(range(1, 5))
@@ -162,7 +162,11 @@ class BaseTransactionFrame(BaseFrame):
         return P.isdigit() or P == ""
 
     def get_action_code(self):
-        return "IN" if self.action == "入庫" else "OUT"
+        if self.action == "入庫":
+            return "IN"
+        if self.action == "返却":
+            return "RETURN"
+        return "OUT"
 
     # -------------------
     # 登録処理
@@ -215,6 +219,10 @@ class BaseTransactionFrame(BaseFrame):
                 actual_qty = input_box_qty * quantity_per_unit
                 after_qty = before_qty + actual_qty
                 action_db = "IN"
+            elif self.action == "返却":
+                actual_qty = input_box_qty
+                after_qty = before_qty + actual_qty
+                action_db = "RETURN"
             else:
                 actual_qty = input_box_qty
                 after_qty = before_qty - actual_qty

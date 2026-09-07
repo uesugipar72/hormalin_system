@@ -5,6 +5,7 @@ from gui.login_frame import LoginFrame
 from gui.menu_frame import MenuFrame
 from gui.stock_in_frame import StockInFrame
 from gui.stock_out_frame import StockOutFrame
+from gui.stock_return_frame import StockReturnFrame
 from gui.history_frame import HistoryFrame
 from gui.inventory_frame import InventoryFrame
 from gui.master_frame import MasterFrame
@@ -40,6 +41,7 @@ class App(tk.Tk):
             MenuFrame,
             StockInFrame,
             StockOutFrame,
+            StockReturnFrame,
             HistoryFrame,
             InventoryFrame,
             PoisonLedgerFrame,

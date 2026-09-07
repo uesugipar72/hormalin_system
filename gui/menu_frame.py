@@ -20,7 +20,13 @@ class MenuFrame(BaseFrame):
             text="出庫",
             command=lambda: controller.show_frame("StockOutFrame")
         ).pack(pady=10)
-        
+
+        ttk.Button(
+            self,
+            text="返却",
+            command=lambda: controller.show_frame("StockReturnFrame")
+        ).pack(pady=10)
+
         ttk.Button(
             self,
             text="在庫確認",

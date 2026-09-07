@@ -281,7 +281,8 @@ class HistoryFrame(BaseFrame):
         data = self.get_history_data()
         action_map = {
             "IN": "入庫",
-            "OUT": "出庫"
+            "OUT": "出庫",
+            "RETURN": "返却"
         }
 
         selected = self.filter_cb.get()
