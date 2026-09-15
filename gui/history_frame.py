@@ -373,14 +373,14 @@ class HistoryFrame(BaseFrame):
     def reset_filters(self):
 
         # 今日・1か月前を再計算
-        today, one_month_ago = self.get_default_dates()
+        today, one_week_ago = self.get_default_dates()
 
         # 試薬フィルタ
         self.filter_cb.set("すべて")
 
         # 開始日
         self.start_date_var.set(
-            one_month_ago.strftime("%Y-%m-%d")
+            one_week_ago.strftime("%Y-%m-%d")
         )
 
         # 終了日
