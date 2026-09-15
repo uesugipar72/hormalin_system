@@ -30,7 +30,7 @@ class HistoryFrame(BaseFrame):
         filter_frame = ttk.Frame(self)
         filter_frame.pack(fill="x", padx=10, pady=5, anchor="w")
 
-        today, one_month_ago = self.get_default_dates()
+        today, one_week_ago = self.get_default_dates()
 
         # =====================================
         # 開始日
@@ -39,7 +39,7 @@ class HistoryFrame(BaseFrame):
         ttk.Label(filter_frame, text="開始日").pack(side="left", padx=(15, 5))
 
         self.start_date_var = tk.StringVar()
-        self.start_date_var.set(one_month_ago.strftime("%Y-%m-%d"))
+        self.start_date_var.set(one_week_ago.strftime("%Y-%m-%d"))
 
         self.start_date_entry = ttk.Entry(
             filter_frame,
@@ -194,9 +194,9 @@ class HistoryFrame(BaseFrame):
     def get_default_dates(self):
 
         today = datetime.now()
-        one_month_ago = today - timedelta(days=30)
+        one_week_ago = today - timedelta(days=7)
 
-        return today, one_month_ago
+        return today, one_week_ago
 
     def open_calendar(self, target_var):
 
